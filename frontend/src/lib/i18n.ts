@@ -1,6 +1,12 @@
+import { eventDetailsMessages } from "./i18n-event-details.ts";
+import { cityEventsMessages } from "./i18n-city-events.ts";
+import { cityMessages } from "./i18n-city.ts";
 import { homeMessages } from "./i18n-home.ts";
 import { discoveryMessages } from "./i18n-discovery.ts";
 import { plannerMessages } from "./i18n-planner.ts";
+import { membershipMessages } from "./i18n-membership.ts";
+import { socialMessages } from "./i18n-social.ts";
+import { assistantMessages } from "./i18n-assistant.ts";
 
 export const languages = { ru: "Русский", en: "English", kk: "Қазақша" } as const;
 export type Locale = keyof typeof languages;
@@ -10,7 +16,12 @@ export function isLocale(value: unknown): value is Locale {
 }
 
 const messages: Readonly<Record<string, readonly [string, string]>> = {
-  ...homeMessages, ...discoveryMessages, ...plannerMessages,
+  ...cityMessages, ...cityEventsMessages, ...eventDetailsMessages,
+  "Close details": ["Закрыть подробности", "Мәліметтерді жабу"],
+  "Previous event": ["Предыдущее событие", "Алдыңғы іс-шара"],
+  "Next event": ["Следующее событие", "Келесі іс-шара"],
+  "Show details": ["Подробнее", "Толығырақ"],
+  ...homeMessages, ...discoveryMessages, ...plannerMessages, ...membershipMessages, ...socialMessages, ...assistantMessages,
   "Outly USA home": ["Outly USA — главная", "Outly USA — басты бет"],
   "Main navigation": ["Основная навигация", "Негізгі навигация"],
   "Skip to content": ["Перейти к содержанию", "Негізгі мазмұнға өту"],

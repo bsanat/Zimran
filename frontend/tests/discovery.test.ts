@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { getUpcomingMajorEvents } from "../src/lib/discovery.ts";
+import { getUpcomingMajorEvents, nextOccurrences, topEventCities } from "../src/lib/discovery.ts";
 import { INTERESTS, createDefaultDraft, toPlannerRequest } from "../src/lib/planner.ts";
 import type { EventData } from "../src/types/event.ts";
 
@@ -29,4 +29,28 @@ test("the requested discovery categories also work in the planner contract", () 
     assert.ok(interest);
     assert.deepEqual(toPlannerRequest({ ...createDefaultDraft(), interests: [interest.id] }, now).interests, [id]);
   }
+});
+
+test("upcoming picks order verified dates and group sessions and skip excluded or past dates", () => {
+  const rows = [
+    { ...fixture, id: "weekly", startAt: null, isRecurring: true, recurrenceDays: [6], excludedDates: ["2026-11-14"] },
+    { ...fixture, id: "dated", startAt: null, startDate: "2026-11-17", endDate: "2026-11-18" },
+    { ...fixture, id: "already-started", startAt: "2026-11-14T08:00:00Z", endDate: "2026-11-14" },
+    { ...fixture, id: "too-far", startAt: null, startDate: "2026-12-14" },
+    { ...fixture, id: "cancelled", status: "cancelled" as const },
+    { ...fixture, id: "unconfirmed", startAt: null },
+  ];
+  assert.deepEqual(nextOccurrences(rows, now).map(({ event, date }) => [event.id, date]), [
+    ["dated", "2026-11-17"], ["weekly", "2026-11-21"],
+  ]);
+});
+
+test("featured cities rank scheduled listings by state and city with stable ties", () => {
+  const locations = [["NY", "New York"], ["NY", "New York"], ["OR", "Portland"], ["ME", "Portland"],
+    ["CA", "San Francisco"], ["NV", "Las Vegas"], ["DC", "Washington"]];
+  const events = locations.map(([state, city]) => ({ state, city, status: "scheduled" as const }));
+  const ranked = topEventCities([...events, { state: "DC", city: "Washington", status: "cancelled" }]);
+  assert.deepEqual(ranked.map(({ state, city, count }) => [state, city, count]), [
+    ["NY", "New York", 2], ["NV", "Las Vegas", 1], ["ME", "Portland", 1], ["OR", "Portland", 1], ["CA", "San Francisco", 1],
+  ]);
 });

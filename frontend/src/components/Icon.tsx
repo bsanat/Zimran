@@ -1,6 +1,10 @@
 import type { CSSProperties } from "react";
 
 const paths: Record<string, string> = {
+  copy: "M9 9h11v12H9zM6 16H3V3h12v3",
+  ticket: "M3 5h18v5a2 2 0 0 0 0 4v5H3v-5a2 2 0 0 0 0-4V5Zm12 2v2m0 2v2m0 2v2",
+  bell: "M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9ZM10 21h4",
+  people: "M16 21v-3a6 6 0 0 0-12 0v3M14 6a4 4 0 1 1-8 0 4 4 0 0 1 8 0Zm6 15v-3a6 6 0 0 0-3-5m0-11a4 4 0 0 1 0 8",
   globe: "M22 12a10 10 0 1 1-20 0 10 10 0 0 1 20 0ZM2 12h20M12 2c5 5 5 15 0 20-5-5-5-15 0-20Z",
   arrow: "M5 12h14m-6-6 6 6-6 6",
   chevron: "m6 9 6 6 6-6",

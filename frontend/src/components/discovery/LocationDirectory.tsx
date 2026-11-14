@@ -5,6 +5,7 @@ import { useState } from "react";
 import { Icon } from "@/components/Icon";
 import { useLanguage } from "@/components/LanguageProvider";
 import { catalogRegions, filterCatalogEvents } from "@/lib/catalog";
+import { cityPath } from "@/lib/city-path";
 import { UnitedStatesMap } from "./UnitedStatesMap";
 
 export function LocationDirectory() {
@@ -29,7 +30,7 @@ export function LocationDirectory() {
     <UnitedStatesMap selectedCode={stateCode} onSelect={selectState} />
     <div className="location-state-summary" aria-live="polite"><h3>{t(state.name)}</h3><span>{state.code}</span></div>
     <div className="city-directory-grid" aria-live="polite">
-      {cities.map(city => <Link className="city-directory-card city-live" href={`/explore?state=${state.code}&city=${encodeURIComponent(city)}`} key={city}><Icon name="pin" size={22} /><div><strong>{t(city)}</strong><span>{t(state.name)}</span></div><span>{t("Events: {count}").replace("{count}", String(filterCatalogEvents({ state: state.code, city }).length))} <Icon name="arrow" size={16} /></span></Link>)}
+      {cities.map(city => <Link className="city-directory-card city-live" href={cityPath(state.code, city)} key={city}><Icon name="pin" size={22} /><div><strong>{t(city)}</strong><span>{t(state.name)}</span></div><span>{t("Events: {count}").replace("{count}", String(filterCatalogEvents({ state: state.code, city }).length))} <Icon name="arrow" size={16} /></span></Link>)}
     </div>
     <p className="location-scope-note">{t("Counts show the checked listings in this catalog. More events may be available on the official websites.")}</p>
   </section>;
