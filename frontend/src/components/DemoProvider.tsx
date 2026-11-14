@@ -1,8 +1,8 @@
 "use client";
 
 import { createContext, useCallback, useContext, useEffect, useState } from "react";
-import { demoRequest, isSubscription } from "@/lib/demo-api";
-import type { DemoSubscription, NotificationFeed } from "@/types/social";
+import { activateDemoPremium, deactivateDemoPremium, getNotifications, getSubscription } from "@/lib/backend-api";
+import type { DemoSubscription } from "@/types/social";
 
 interface DemoContextValue {
   subscription: DemoSubscription | null; loading: boolean; error: string; unreadCount: number;
@@ -17,14 +17,13 @@ export function DemoProvider({ children }: { children: React.ReactNode }) {
   const [error, setError] = useState("");
   const [unreadCount, setUnreadCount] = useState(0);
   const refreshNotifications = useCallback(async () => {
-    const feed = await demoRequest<NotificationFeed>("notifications");
+    const feed = await getNotifications();
     setUnreadCount(feed.unreadCount);
   }, []);
   const refresh = useCallback(async () => {
     setLoading(true); setError("");
     try {
-      const value = await demoRequest<DemoSubscription>("subscription");
-      if (!isSubscription(value)) throw new Error("The server returned an incomplete response. Please try again.");
+      const value = await getSubscription();
       setSubscription(value);
       if (value.status === "DEMO_PREMIUM") await refreshNotifications();
       else setUnreadCount(0);
@@ -33,8 +32,7 @@ export function DemoProvider({ children }: { children: React.ReactNode }) {
     } finally { setLoading(false); }
   }, [refreshNotifications]);
   const updateSubscription = useCallback(async (action: "activate" | "deactivate") => {
-    const value = await demoRequest<DemoSubscription>("subscription", { method: "POST", body: JSON.stringify({ action }) });
-    if (!isSubscription(value)) throw new Error("The server returned an incomplete response. Please try again.");
+    const value = await (action === "activate" ? activateDemoPremium() : deactivateDemoPremium());
     setSubscription(value); setError("");
     if (value.status === "DEMO_PREMIUM") await refreshNotifications();
     else setUnreadCount(0);

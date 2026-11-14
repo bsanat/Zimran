@@ -53,6 +53,12 @@ public class EntitlementServiceImpl implements EntitlementService, DemoEntitleme
         repository.upsertDemoPremium(scope.getScopeId(), clock.instant());
     }
 
+    @Override
+    @Transactional
+    public void deactivateDemoPremium(RequestScope scope) {
+        repository.downgradeDemoPremium(scope.getScopeId(), clock.instant());
+    }
+
     private static Entitlement toDomain(SubscriptionEntitlement entity) {
         return Entitlement.builder()
                 .status(entity.getStatus())

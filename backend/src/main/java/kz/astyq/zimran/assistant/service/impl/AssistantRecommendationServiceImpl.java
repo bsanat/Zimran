@@ -38,9 +38,16 @@ public class AssistantRecommendationServiceImpl implements AssistantRecommendati
 
     @Override
     public AssistantRecommendation recommend(ValidatedPlanRequest request, RequestScope scope) {
+        return recommend(request, scope, true);
+    }
+
+    @Override
+    public AssistantRecommendation recommend(ValidatedPlanRequest request, RequestScope scope, boolean countQuota) {
         Objects.requireNonNull(request, "request");
         Objects.requireNonNull(scope, "scope");
-        usageQuotaService.requireAvailable(scope, UsageFeature.ASSISTANT);
+        if (countQuota) {
+            usageQuotaService.requireAvailable(scope, UsageFeature.ASSISTANT);
+        }
 
         CandidateSet candidateSet = limit(candidateService.buildCandidates(request));
         if (candidateSet.getCandidates().isEmpty()) {
@@ -53,10 +60,13 @@ public class AssistantRecommendationServiceImpl implements AssistantRecommendati
 
         Plan plan = recommendationService.recommendByAi(request, candidateSet, appSettings.getLocale())
                 .orElseThrow(() -> new ServiceValidationException(ErrorCode.AI_UNAVAILABLE, MessageCode.AI_UNAVAILABLE));
-        usageQuotaService.consume(scope, UsageFeature.ASSISTANT);
+        if (countQuota) {
+            usageQuotaService.consume(scope, UsageFeature.ASSISTANT);
+        }
         log.info("Assistant plan {}: {} candidates, {} recommendations", plan.getId(),
                 candidateSet.getCandidates().size(), plan.getRecommendations().size());
         return AssistantRecommendation.builder()
+                .planId(plan.getId().toString())
                 .summary(plan.getSummary())
                 .recommendations(plan.getRecommendations())
                 .relaxations(plan.getRecommendations().isEmpty() ? RelaxationSuggestions.forRequest(request) : List.of())

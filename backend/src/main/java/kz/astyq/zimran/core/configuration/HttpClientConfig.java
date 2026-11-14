@@ -24,8 +24,8 @@ public class HttpClientConfig {
     }
 
     @Bean
-    public RestClient openAiRestClient(ObjectProvider<RestClient.Builder> builderProvider,
-                                       OpenAiProperties properties) {
+    public RestClient geminiRestClient(ObjectProvider<RestClient.Builder> builderProvider,
+                                       GeminiProperties properties) {
         return restClient(builderProvider.getIfAvailable(RestClient::builder).clone(),
                 properties.getConnectTimeout(), properties.getReadTimeout(), properties.getBaseUrl());
     }

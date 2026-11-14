@@ -14,6 +14,10 @@ public final class MessageCode {
     public static final String CLARIFY_CITY = "assistant_clarify_city";
     public static final String CLARIFY_DATES = "assistant_clarify_dates";
     public static final String CLARIFY_INTERESTS = "assistant_clarify_interests";
+    public static final String CONVERSATION_NOT_FOUND = "assistant_conversation_not_found";
+    public static final String CONVERSATION_EXPIRED = "assistant_conversation_expired";
+    /** Argument {0}: the turn limit. */
+    public static final String TURN_LIMIT = "assistant_turn_limit";
 
     private static final String RELAXATION_PREFIX = "assistant_relax_";
 

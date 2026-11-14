@@ -78,7 +78,7 @@ export const membershipMessages: Record<string, readonly [string, string]> = {
   "Notification center": ["Центр уведомлений", "Хабарландырулар орталығы"],
   "Notification settings": ["Настройки уведомлений", "Хабарландыру баптаулары"],
   "A little heads-up for your next day out.": ["Не пропустите повод выйти из дома.", "Сыртқа шығуға себепті жіберіп алмаңыз."],
-  "Music means music. Your alerts follow the categories, city, dates, and budget you choose.": ["Музыка — значит музыка. Уведомления учитывают выбранные категории, город, даты и бюджет.", "Музыка десеңіз — музыка. Хабарландырулар таңдаған санат, қала, күндер мен бюджетке сәйкес келеді."],
+  "Music means music. Your alerts follow the categories, city, and budget you choose.": ["Музыка — значит музыка. Уведомления учитывают выбранные категории, город и бюджет.", "Музыка десеңіз — музыка. Хабарландырулар таңдаған санат, қала мен бюджетке сәйкес келеді."],
   "Demo previews use real events from the catalog. They are marked Demo and do not send email.": ["В демо используются реальные события каталога с отметкой Demo. Письма не отправляются.", "Демода каталогтағы нақты іс-шаралар Demo белгісімен көрсетіледі. Электрондық хат жіберілмейді."],
   "See Premium benefits": ["Возможности Premium", "Premium мүмкіндіктері"],
   "Your next good reason to go out.": ["Ваш следующий повод выйти из дома.", "Сыртқа шығуға келесі себеп."],

@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 /**
- * One OpenAI chat message ({@code role} = system, user or assistant).
+ * One chat completion message ({@code role} = system, user or assistant).
  */
 @Getter
 @Setter

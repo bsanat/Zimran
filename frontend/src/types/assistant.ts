@@ -10,7 +10,8 @@ export interface AssistantChatRequest {
 }
 
 export interface AssistantChatResponse {
-  engine: "catalog";
+  /** "ai": the Spring backend with Google Gemini; "catalog": the built-in rule-based chat. */
+  engine: "catalog" | "ai";
   preferences: Partial<PlannerRequest>;
   pendingFields: AssistantPendingField[];
   clarifications: string[];

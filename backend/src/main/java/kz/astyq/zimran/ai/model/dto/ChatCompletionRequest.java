@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Body of OpenAI {@code POST /chat/completions} with a strict JSON schema response format.
+ * Body of {@code POST /chat/completions} (Gemini's OpenAI-compatible endpoint) with a strict JSON schema response format.
  */
 @Getter
 @Setter

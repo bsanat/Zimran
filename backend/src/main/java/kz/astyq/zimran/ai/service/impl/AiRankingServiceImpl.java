@@ -6,7 +6,7 @@ import kz.astyq.zimran.ai.service.AiCompletionService;
 import kz.astyq.zimran.ai.service.AiRankingService;
 import kz.astyq.zimran.ai.util.RankingPromptBuilder;
 import kz.astyq.zimran.ai.util.RankingResponseSchema;
-import kz.astyq.zimran.core.configuration.OpenAiProperties;
+import kz.astyq.zimran.core.configuration.GeminiProperties;
 import kz.astyq.zimran.core.exception.ServiceValidationException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -22,7 +22,7 @@ import java.util.Optional;
 public class AiRankingServiceImpl implements AiRankingService {
 
     private final AiCompletionService aiCompletionService;
-    private final OpenAiProperties properties;
+    private final GeminiProperties properties;
     private final JsonMapper jsonMapper;
 
     @Override

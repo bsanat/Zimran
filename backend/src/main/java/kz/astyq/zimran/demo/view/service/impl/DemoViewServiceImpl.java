@@ -41,6 +41,13 @@ public class DemoViewServiceImpl implements DemoViewService {
     }
 
     @Override
+    public SubscriptionViewResponse deactivatePremium(RequestScope scope) {
+        demoAccessService.requireEnabled();
+        demoEntitlementService.deactivateDemoPremium(scope);
+        return subscriptionSummaryService.getSummary(scope);
+    }
+
+    @Override
     public EventDetailsViewResponse createEvent(DemoEventCreateRequest request, RequestScope scope) {
         demoAccessService.requireDemoPremium(scope);
         rateLimitService.consume(RateLimitAction.DEMO_EVENT, scope);

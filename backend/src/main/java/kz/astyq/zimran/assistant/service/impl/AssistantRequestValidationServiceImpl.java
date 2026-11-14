@@ -1,5 +1,6 @@
 package kz.astyq.zimran.assistant.service.impl;
 
+import kz.astyq.zimran.assistant.model.domain.AssistantChatPreferences;
 import kz.astyq.zimran.assistant.model.dto.AssistantRecommendRequest;
 import kz.astyq.zimran.assistant.service.AssistantRequestValidationService;
 import kz.astyq.zimran.core.exception.ServiceValidationException;
@@ -53,7 +54,25 @@ public class AssistantRequestValidationServiceImpl implements AssistantRequestVa
             String renamed = field != null ? FIELD_NAMES.get(field.toString()) : null;
             throw renamed != null ? e.withDetail("field", renamed) : e;
         }
-        String message = request.getMessage();
+        return withMessage(validated, request.getMessage());
+    }
+
+    @Override
+    public ValidatedPlanRequest validate(AssistantChatPreferences preferences, String message) {
+        Objects.requireNonNull(preferences, "preferences");
+        ValidatedPlanRequest validated = planRequestValidationService.validate(PlanCreateRequest.builder()
+                .city(preferences.getCity() != null ? preferences.getCity().getId() : null)
+                .interests(List.copyOf(preferences.getInterests()))
+                .startDate(preferences.getDateFrom())
+                .endDate(preferences.getDateTo())
+                .budgetMax(preferences.getBudgetMax())
+                .timePreference(preferences.getTimePreference())
+                .notes(preferences.getNotes())
+                .build());
+        return withMessage(validated, message);
+    }
+
+    private static ValidatedPlanRequest withMessage(ValidatedPlanRequest validated, String message) {
         return validated.toBuilder().message(StringUtils.hasText(message) ? message.strip() : null).build();
     }
 

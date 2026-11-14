@@ -1,7 +1,7 @@
 package kz.astyq.zimran.ai.service;
 
 /**
- * Caps OpenAI calls per minute for the whole process ({@code app.openai.max-requests-per-minute}) so a burst of
+ * Caps Gemini calls per minute for the whole process ({@code app.gemini.max-requests-per-minute}) so a burst of
  * plans cannot run up cost; calls over the cap use the rule-based ranking instead.
  */
 public interface AiUsageGuard {

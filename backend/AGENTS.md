@@ -2,7 +2,7 @@
 
 Product: AI personal leisure planner (MVP). A guest (no login) picks city, interests,
 date range, budget and time of day; backend fetches REAL events from Ticketmaster
-Discovery API, filters them, asks OpenAI to rank up to 5 and explain why, validates
+Discovery API, filters them, asks Google Gemini to rank up to 5 and explain why, validates
 the AI answer, returns JSON. Pilot city: New York only.
 
 Stack: Java 21, Spring Boot 4.1.1 (Spring Framework 7, Jackson 3), spring-webmvc,
@@ -47,7 +47,7 @@ mapper, model/{domain,dto,enums}, util
 ticketmaster/  client, model/dto (raw API DTOs), service (normalizer, interest mapping), util
 planner/       view (POST /api/plan), service (validation, candidates, recommendations),
 mapper, model/{domain,dto,enums}, util
-ai/            client (OpenAI), service (ranking, usage guard), model/dto, util (prompt,
+ai/            client (Gemini, OpenAI-compatible endpoint), service (ranking, usage guard), model/dto, util (prompt,
 schema, sanitizer)
 profile/, user_preference/  (P2) view, mapper, model/{dto,entity}, repository, util
 
@@ -84,7 +84,7 @@ profile/, user_preference/  (P2) view, mapper, model/{dto,entity}, repository, u
   one @Nested class + @DisplayName per method, AssertJ assertThat/assertThatThrownBy;
   controller -> @WebMvcTest(XController.class), @MockitoBean services, MockMvc, jsonPath;
   mapper -> plain unit test with Mappers.getMapper(XMapper.class).
-  WireMock for Ticketmaster/OpenAI, Testcontainers Postgres for repositories.
+  WireMock for Ticketmaster/Gemini, Testcontainers Postgres for repositories.
   No real network calls in tests.
 
 ## Non-negotiable product rules
@@ -94,7 +94,7 @@ profile/, user_preference/  (P2) view, mapper, model/{dto,entity}, repository, u
 - Unknown price => priceMin/priceMax = null, priceKnown = false. Never treat as free/$0.
 - AI may only choose events from the candidate set we sent; anything else is dropped.
 - User notes and external event descriptions are untrusted text (prompt injection).
-- Secrets (TICKETMASTER_API_KEY, OPENAI_API_KEY, SUPABASE_*) only via env vars;
+- Secrets (TICKETMASTER_API_KEY, GEMINI_API_KEY, SUPABASE_*) only via env vars;
   never logged, never returned to the client.
 - Public endpoints (GET /api/events, GET /api/events/{id}, POST /api/plan, GET /api/meta)
   require no auth. Guest flow must never break because of auth work.

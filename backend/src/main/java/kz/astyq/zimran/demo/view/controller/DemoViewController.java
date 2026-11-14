@@ -20,6 +20,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.CacheControl;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -45,6 +46,20 @@ public class DemoViewController {
     @PostMapping("/premium")
     public ResponseEntity<SubscriptionViewResponse> activatePremium(@CurrentScope RequestScope scope) {
         return ResponseEntity.ok().cacheControl(CacheControl.noStore()).body(demoViewService.activatePremium(scope));
+    }
+
+    @Operation(summary = "End Premium Demo",
+            description = "Returns the caller from DEMO_PREMIUM to FREE. A paid subscription is never changed. "
+                    + "Idempotent. Returns the updated subscription.",
+            security = @SecurityRequirement(name = OpenApiConfig.GUEST_TOKEN_SCHEME))
+    @ApiResponse(responseCode = "200", description = "The updated subscription")
+    @ApiResponse(responseCode = "401", description = "Missing, invalid or expired X-Guest-Token",
+            content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+    @ApiResponse(responseCode = "404", description = "Demo features are disabled",
+            content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+    @DeleteMapping("/premium")
+    public ResponseEntity<SubscriptionViewResponse> deactivatePremium(@CurrentScope RequestScope scope) {
+        return ResponseEntity.ok().cacheControl(CacheControl.noStore()).body(demoViewService.deactivatePremium(scope));
     }
 
     @Operation(summary = "Add a sample event",

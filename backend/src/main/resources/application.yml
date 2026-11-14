@@ -26,7 +26,7 @@ app:
   frontend-url: ${FRONTEND_URL:http://localhost:3000}
   city:
     default-id: nyc
-    # Every city of the event feed (data/events.json); a city missing here gets no search results.
+    # Every city of the event feed (events-source.location); a city missing here gets no search results.
     supported:
       - id: nyc
         name: New York
@@ -55,6 +55,11 @@ app:
         zone: America/Phoenix
       - id: los-angeles-ca
         name: Los Angeles
+        state-code: CA
+        country-code: US
+        zone: America/Los_Angeles
+      - id: pacific-palisades-ca
+        name: Pacific Palisades
         state-code: CA
         country-code: US
         zone: America/Los_Angeles
@@ -339,8 +344,9 @@ app:
         - /api/plan
   events-source:
     # File path or http(s) URL of the JSON event feed. Blank = the catalog answers 503.
-    # Default: backend/data/events.json, relative to the directory the app is started from (backend/).
-    location: ${EVENTS_JSON_SOURCE:data/events.json}
+    # Default: the frontend's verified catalog, so both apps serve the same events. Relative to the
+    # directory the app is started from (backend/).
+    location: ${EVENTS_JSON_SOURCE:../frontend/src/data/catalog.json}
     refresh-interval: ${EVENTS_JSON_REFRESH:1m}
     connect-timeout: 3s
     read-timeout: 10s
@@ -367,18 +373,20 @@ app:
       fitness: [workout, exercise, training]
       wellness: [yoga, meditation, "health & wellness", mindfulness]
       crypto: [blockchain, web3, cryptocurrency]
-  openai:
-    base-url: ${OPENAI_BASE_URL:https://api.openai.com/v1}
-    api-key: ${OPENAI_API_KEY:}
-    model: ${OPENAI_MODEL:gpt-5-mini}
-    reasoning-effort: ${OPENAI_REASONING_EFFORT:low}
+  # Google Gemini through its OpenAI-compatible endpoint. Free key: https://aistudio.google.com/apikey
+  gemini:
+    base-url: ${GEMINI_BASE_URL:https://generativelanguage.googleapis.com/v1beta/openai}
+    api-key: ${GEMINI_API_KEY:}
+    model: ${GEMINI_MODEL:gemini-3.5-flash-lite}
+    reasoning-effort: ${GEMINI_REASONING_EFFORT:low}
     connect-timeout: 3s
     # The whole AI call is capped by total-timeout so POST /api/plan answers within 25 s
     # (the frontend aborts at 30 s); the rule-based ranking answers after it.
     read-timeout: 15s
     total-timeout: 18s
     max-output-tokens: 2000
-    max-requests-per-minute: ${OPENAI_MAX_REQUESTS_PER_MINUTE:30}
+    # Free-tier quotas are per minute and per day; keep this under your key's limit.
+    max-requests-per-minute: ${GEMINI_MAX_REQUESTS_PER_MINUTE:10}
   guest:
     # HMAC-SHA256 key for X-Guest-Token, at least 32 bytes. Blank = random per process (dev only).
     token-secret: ${GUEST_TOKEN_SECRET:}
@@ -420,11 +428,18 @@ app:
       pair-create: { capacity: 5, refill-period: 1m }
       buddy-post: { capacity: 5, refill-period: 1h }
       buddy-request: { capacity: 20, refill-period: 1h }
+      report-create: { capacity: 10, refill-period: 1h }
       alerts-check: { capacity: 6, refill-period: 1m }
       demo-event: { capacity: 10, refill-period: 1m }
   ai:
-    # AI assistant (POST /api/ai/recommend): events sent to the model per recommendation.
+    # AI assistant (POST /api/ai/recommend, /api/ai/chat): events sent to the model per recommendation.
     max-candidates: 20
+    # A chat counts the assistant quota once, then gives up to max-conversation-turns results until it expires.
+    conversation-ttl: ${ASSISTANT_CONVERSATION_TTL:24h}
+    max-conversation-turns: ${ASSISTANT_MAX_CONVERSATION_TURNS:30}
+  buddy:
+    # Marks Buddy posts EXPIRED after their event has started (Spring cron, 6 fields).
+    expiry-cron: ${BUDDY_EXPIRY_CRON:0 */5 * * * *}
   pair:
     # How long a Pair invite stays open before the session EXPIRES.
     invite-ttl: ${PAIR_INVITE_TTL:48h}

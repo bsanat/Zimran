@@ -11,7 +11,7 @@ import java.util.Map;
 import java.util.Optional;
 
 /**
- * The JSON schema of the Pair Planning reason answer (OpenAI strict structured output) and its server-side check:
+ * The JSON schema of the Pair Planning reason answer (strict JSON-schema structured output) and its server-side check:
  * <pre>
  * {"reasons": [{"eventId": string, "reasonA": string, "reasonB": string}]}
  * </pre>

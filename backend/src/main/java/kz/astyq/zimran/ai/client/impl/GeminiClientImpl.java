@@ -1,11 +1,11 @@
 package kz.astyq.zimran.ai.client.impl;
 
-import kz.astyq.zimran.ai.client.OpenAiClient;
+import kz.astyq.zimran.ai.client.GeminiClient;
 import kz.astyq.zimran.ai.model.dto.ChatCompletionRequest;
 import kz.astyq.zimran.ai.model.dto.ChatCompletionResponse;
 import kz.astyq.zimran.ai.model.dto.ChatMessage;
 import kz.astyq.zimran.ai.util.MessageCode;
-import kz.astyq.zimran.core.configuration.OpenAiProperties;
+import kz.astyq.zimran.core.configuration.GeminiProperties;
 import kz.astyq.zimran.core.exception.ServiceValidationException;
 import kz.astyq.zimran.core.util.ErrorCode;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -18,12 +18,12 @@ import org.springframework.web.client.RestClientException;
 import java.util.List;
 
 @Component
-public class OpenAiClientImpl implements OpenAiClient {
+public class GeminiClientImpl implements GeminiClient {
 
     private final RestClient restClient;
-    private final OpenAiProperties properties;
+    private final GeminiProperties properties;
 
-    public OpenAiClientImpl(@Qualifier("openAiRestClient") RestClient restClient, OpenAiProperties properties) {
+    public GeminiClientImpl(@Qualifier("geminiRestClient") RestClient restClient, GeminiProperties properties) {
         this.restClient = restClient;
         this.properties = properties;
     }

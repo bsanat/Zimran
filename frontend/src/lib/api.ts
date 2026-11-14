@@ -19,7 +19,7 @@ function record(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 
-function isEvent(value: unknown): value is EventData {
+export function isEvent(value: unknown): value is EventData {
   if (!record(value)) return false;
   const strings = ["id", "source", "sourceEventId", "title", "category", "city", "timezone"];
   const nullableStrings = ["startAt", "sourceUrl", "venue", "address", "description", "imageUrl", "currency"];
@@ -51,7 +51,11 @@ function defaultMessage(status: number): string {
   return "We could not complete your request. Please try again.";
 }
 
-async function request(path: string, init: RequestInit, signal?: AbortSignal): Promise<unknown> {
+/**
+ * Low-level JSON request to `${NEXT_PUBLIC_API_BASE_URL}/api${path}`. With allowEmpty, a 204 No Content
+ * resolves to null instead of being treated as an invalid response.
+ */
+export async function apiRequest(path: string, init: RequestInit, signal?: AbortSignal, allowEmpty = false): Promise<unknown> {
   const controller = new AbortController();
   let timedOut = false;
   const abort = () => controller.abort();
@@ -60,9 +64,14 @@ async function request(path: string, init: RequestInit, signal?: AbortSignal): P
   const timeout = setTimeout(() => { timedOut = true; controller.abort(); }, 30_000);
   try {
     const base = (process.env.NEXT_PUBLIC_API_BASE_URL ?? "").replace(/\/$/, "");
-    const response = await fetch(`${base}/api${path}`, {
-      ...init, signal: controller.signal, headers: { Accept: "application/json", ...init.headers },
-    });
+    // Headers instances do not spread into an object, so merge through Headers.
+    const headers = new Headers(init.headers);
+    if (!headers.has("Accept")) headers.set("Accept", "application/json");
+    // A cross-origin backend (NEXT_PUBLIC_API_BASE_URL) never sees the outly-lang cookie, so name the page's
+    // language; behind the proxy the cookie still wins.
+    const pageLanguage = typeof document !== "undefined" ? document.documentElement.lang : "";
+    if (pageLanguage && !headers.has("Accept-Language")) headers.set("Accept-Language", pageLanguage);
+    const response = await fetch(`${base}/api${path}`, { ...init, signal: controller.signal, headers });
     let body: unknown;
     try { body = await response.json(); } catch (error) {
       if (controller.signal.aborted) throw error;
@@ -80,6 +89,7 @@ async function request(path: string, init: RequestInit, signal?: AbortSignal): P
         typeof details?.field === "string" ? details.field : undefined,
       );
     }
+    if (allowEmpty && response.status === 204) return null;
     if (!record(body)) invalidResponse();
     return body;
   } catch (error) {
@@ -106,7 +116,7 @@ export async function getEvents(
   if (filters.keyword) query.set("keyword", filters.keyword);
   if (filters.budgetMax !== undefined) query.set("budgetMax", String(filters.budgetMax));
   if (filters.source) query.set("source", filters.source);
-  const body = await request(`/events?${query}`, {}, signal);
+  const body = await apiRequest(`/events?${query}`, {}, signal);
   if (!record(body) || !Array.isArray(body.events) || !body.events.every(isEvent) ||
       !record(body.pagination) || !Number.isInteger(body.pagination.page) || (body.pagination.page as number) < 1 ||
       !Number.isInteger(body.pagination.pageSize) || (body.pagination.pageSize as number) < 1 ||
@@ -129,13 +139,13 @@ export async function getCityEvents(state: string, city: string, signal: AbortSi
 }
 
 export async function getEvent(id: string, signal?: AbortSignal): Promise<{ event: EventData }> {
-  const body = await request(`/events/${encodeURIComponent(id)}`, {}, signal);
+  const body = await apiRequest(`/events/${encodeURIComponent(id)}`, {}, signal);
   if (!record(body) || !isEvent(body.event)) invalidResponse();
   return { event: body.event };
 }
 
 export async function generatePlan(payload: PlannerRequest, signal?: AbortSignal): Promise<PlannerResponse> {
-  const body = await request("/plan", {
+  const body = await apiRequest("/plan", {
     method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload),
   }, signal);
   if (!isPlannerResponse(body)) invalidResponse();

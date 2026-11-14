@@ -26,4 +26,15 @@ public interface SubscriptionEntitlementRepository extends JpaRepository<Subscri
             where subscription_entitlements.status = 'FREE'
             """)
     int upsertDemoPremium(@Param("scopeId") String scopeId, @Param("now") Instant now);
+
+    /**
+     * Atomically returns a {@code DEMO_PREMIUM} scope to {@code FREE}. Any other status (a paid subscription, or
+     * no row at all) is left untouched. Safe to call repeatedly and concurrently.
+     */
+    @Modifying
+    @Query(nativeQuery = true, value = """
+            update subscription_entitlements set status = 'FREE', demo_only = false, updated_at = :now
+            where scope_id = :scopeId and is_deleted = false and status = 'DEMO_PREMIUM'
+            """)
+    int downgradeDemoPremium(@Param("scopeId") String scopeId, @Param("now") Instant now);
 }

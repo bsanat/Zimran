@@ -22,4 +22,10 @@ public interface AssistantRecommendationService {
      * Quota exhausted: {@code 403 FREE_LIMIT_REACHED} or {@code 429 RATE_LIMITED} (Premium fair use).
      */
     AssistantRecommendation recommend(ValidatedPlanRequest request, RequestScope scope);
+
+    /**
+     * {@link #recommend(ValidatedPlanRequest, RequestScope)}, but with {@code countQuota = false} the quota is
+     * neither checked nor counted (a later result of an assistant chat that already counted it).
+     */
+    AssistantRecommendation recommend(ValidatedPlanRequest request, RequestScope scope, boolean countQuota);
 }
