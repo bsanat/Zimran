@@ -16,6 +16,31 @@ test("verified catalog covers all 18 interests, all 50 states and Washington DC"
   assert.deepEqual([...new Set(CATALOG_EVENTS.map(event => event.state))].sort(), [...US_STATES.map(state => state.code), "DC"].sort());
   assert.equal(new Set(CATALOG_EVENTS.map(event => event.id)).size, CATALOG_EVENTS.length);
   assert.ok(CATALOG_EVENTS.length >= 51);
+  assert.equal(catalogMeta.eventCount, CATALOG_EVENTS.length);
+  assert.equal(catalogMeta.categoryCount, catalogCategories.length);
+  assert.equal(catalogMeta.cityCount, new Set(CATALOG_EVENTS.map(event => `${event.state}:${event.city}`)).size);
+});
+
+test("expanded city programs respect weekly schedules, closures and uncertain availability", () => {
+  const find = (id: string) => {
+    const event = CATALOG_EVENTS.find(event => event.id === `catalog:${id}`);
+    assert.ok(event, id);
+    return event;
+  };
+  assert.equal(catalogMatchesDate(find("sf-kezar-track"), "2026-11-17"), true);
+  assert.equal(catalogMatchesDate(find("sf-kezar-track"), "2026-11-18"), false);
+  assert.equal(catalogMatchesDate(find("tx-dallas-shed"), "2026-11-21"), true);
+  assert.equal(catalogMatchesDate(find("tx-dallas-shed"), "2026-11-20"), false);
+  assert.equal(catalogMatchesDate(find("la-griffith-tesla"), "2026-11-26"), false);
+  assert.equal(catalogMatchesDate(find("dc-saam-tours"), "2026-12-25"), false);
+  assert.equal(catalogMatchesDate(find("ny-bryant-winter-skating"), "2027-02-28"), true);
+  assert.equal(catalogMatchesDate(find("ny-bryant-winter-skating"), "2027-03-01"), false);
+  assert.equal(catalogMatchesDate(find("ny-ai-tinkerers-gtm-2026"), "2026-11-18"), true);
+  assert.equal(catalogMatchesDate(find("ny-ai-tinkerers-gtm-2026"), "2026-11-19"), false);
+  assert.equal(catalogMatchesDate(find("il-chopping-block-classes"), "2026-11-21"), false);
+  assert.equal(find("ca-sandiego-zoo-bus").priceKnown, false);
+  assert.equal(find("tx-houston-nasa-tram").priceKnown, false);
+  assert.ok(!filterCatalogEvents({ city: "New York", category: "music", budgetMax: 0 }).some(event => event.id === "catalog:ny-dizzys-jazz"));
 });
 
 test("every verified listing has a working local image, an official HTTPS link and a review date", () => {

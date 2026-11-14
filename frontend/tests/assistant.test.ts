@@ -102,9 +102,9 @@ test("real catalog recommendations remain whitelisted and samples produce real r
   assert.ok(result.recommendations.length > 0);
   assert.ok(result.recommendations.length <= 5);
   assert.ok(result.recommendations.every(item => CATALOG_EVENTS.some(event => event.id === item.event.id) && item.event.category === "gaming" && item.event.priceKnown && item.event.priceMin === 0));
-  const sports = recommendCatalog({ ...parsed.preferences, interests: ["sports"] }, now);
-  assert.deepEqual(sports.recommendations, []);
-  assert.ok(sports.suggestions?.length);
+  const unavailable = recommendCatalog({ ...parsed.preferences, interests: ["crypto"] }, now);
+  assert.deepEqual(unavailable.recommendations, []);
+  assert.ok(unavailable.suggestions?.length);
 });
 
 test("chat returns direct real-event recommendations for a complete message", () => {
