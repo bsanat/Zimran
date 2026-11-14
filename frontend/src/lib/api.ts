@@ -27,7 +27,7 @@ function isEvent(value: unknown): value is EventData {
     nullableStrings.every((key) => value[key] === null || typeof value[key] === "string") &&
     ["dateText", "priceText"].every((key) => value[key] === undefined || value[key] === null || typeof value[key] === "string") &&
     ["state", "sourceName", "lastVerifiedAt", "startDate", "endDate"].every((key) => value[key] === undefined || value[key] === null || typeof value[key] === "string") &&
-    ["imageIsIllustration", "isRecurring"].every((key) => value[key] === undefined || typeof value[key] === "boolean") &&
+    ["imageIsIllustration", "isRecurring", "isSocial"].every((key) => value[key] === undefined || typeof value[key] === "boolean") &&
     (value.recurrenceDays === undefined || (Array.isArray(value.recurrenceDays) && value.recurrenceDays.every(day => Number.isInteger(day) && day >= 0 && day <= 6))) &&
     (value.recurrenceMonths === undefined || (Array.isArray(value.recurrenceMonths) && value.recurrenceMonths.every(month => Number.isInteger(month) && month >= 1 && month <= 12))) &&
     ["occurrenceDates", "excludedDates"].every(key => value[key] === undefined || (Array.isArray(value[key]) && value[key].every(date => typeof date === "string"))) &&
@@ -94,7 +94,7 @@ async function request(path: string, init: RequestInit, signal?: AbortSignal): P
 }
 
 export async function getEvents(
-  filters: { city?: string; state?: string; date?: string; category?: string; page?: number; major?: boolean; keyword?: string; source?: "catalog" | "live" },
+  filters: { city?: string; state?: string; date?: string; category?: string; budgetMax?: number; page?: number; major?: boolean; keyword?: string; source?: "catalog" | "live" },
   signal?: AbortSignal,
 ): Promise<EventsResponse> {
   const query = new URLSearchParams({ page: String(filters.page ?? 1) });
@@ -104,6 +104,7 @@ export async function getEvents(
   if (filters.state) query.set("state", filters.state);
   if (filters.major) query.set("major", "true");
   if (filters.keyword) query.set("keyword", filters.keyword);
+  if (filters.budgetMax !== undefined) query.set("budgetMax", String(filters.budgetMax));
   if (filters.source) query.set("source", filters.source);
   const body = await request(`/events?${query}`, {}, signal);
   if (!record(body) || !Array.isArray(body.events) || !body.events.every(isEvent) ||
@@ -111,6 +112,20 @@ export async function getEvents(
       !Number.isInteger(body.pagination.pageSize) || (body.pagination.pageSize as number) < 1 ||
       typeof body.pagination.hasMore !== "boolean") invalidResponse();
   return body as unknown as EventsResponse;
+}
+
+export async function getCityEvents(state: string, city: string, signal: AbortSignal): Promise<EventData[]> {
+  const events = new Map<string, EventData>();
+  for (let page = 1; ; page++) {
+    const response = await getEvents({ state, city, page }, signal);
+    for (const event of response.events) {
+      if (event.city === city && (!event.state || event.state === state) && event.status === "scheduled") {
+        events.set(event.id, event);
+      }
+    }
+    if (!response.pagination.hasMore || !response.events.length) return [...events.values()];
+    if (response.pagination.page !== page) throw new ApiError("The server returned an incomplete response. Please try again.");
+  }
 }
 
 export async function getEvent(id: string, signal?: AbortSignal): Promise<{ event: EventData }> {

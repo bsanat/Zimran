@@ -3,7 +3,7 @@ import { existsSync, readFileSync, statSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import test from "node:test";
 import { CATALOG_EVENTS, catalogCategories, catalogMatchesDate, catalogMeta, catalogRegions, filterCatalogEvents, normalizeCategory } from "../src/lib/catalog.ts";
-import { INTERESTS, safeExternalUrl } from "../src/lib/planner.ts";
+import { addDays, getCityToday, INTERESTS, safeExternalUrl } from "../src/lib/planner.ts";
 import { US_STATES } from "../src/lib/locations.ts";
 import { GET as eventsRoute } from "../src/app/api/events/route.ts";
 import { GET as detailsRoute } from "../src/app/api/events/[id]/route.ts";
@@ -85,7 +85,7 @@ test("catalog API and details work without a provider key or external network re
 });
 
 test("catalog API validates direct callers and accepts the provided category IDs", async () => {
-  for (const query of ["state=invalid", "city=Unknown", "category=unknown", "date=2099-02-30", "page=0", "page=1.5", "source=unknown", "keyword=" + "x".repeat(101)]) {
+  for (const query of ["state=invalid", "city=Unknown", "category=unknown", "date=2099-02-30", "page=0", "page=1.5", "source=unknown", "keyword=" + "x".repeat(101), "budgetMax=-1", "budgetMax=NaN", "budgetMax=Infinity", "budgetMax=", "budgetMax=%20"]) {
     assert.equal((await eventsRoute(new Request(`http://localhost/api/events?${query}`))).status, 400, query);
   }
   for (const category of ["games", "food-drinks", "arts-culture"]) {
@@ -95,4 +95,43 @@ test("catalog API validates direct callers and accepts the provided category IDs
     assert.ok(body.events.length > 0);
     assert.ok(body.events.every((event: EventData) => event.category === normalizeCategory(category)));
   }
+});
+
+test("catalog budget filtering excludes unknown, non-USD and prices above the maximum", t => {
+  const unbounded = filterCatalogEvents();
+  assert.ok(unbounded.some(event => !event.priceKnown));
+  assert.ok(unbounded.some(event => event.priceKnown && event.priceMin !== null && event.priceMin > 0));
+  for (const budgetMax of [0, 25, 50]) {
+    const filtered = filterCatalogEvents({ budgetMax });
+    assert.ok(filtered.length > 0);
+    assert.ok(filtered.every(event => event.priceKnown && event.currency === "USD" && event.priceMin !== null && event.priceMin <= budgetMax));
+    assert.ok(filtered.length < unbounded.length);
+  }
+  const sample = unbounded.find(event => event.priceKnown && event.priceMin === 0)!;
+  const originalCurrency = sample.currency;
+  t.after(() => { sample.currency = originalCurrency; });
+  sample.currency = "EUR";
+  assert.equal(filterCatalogEvents({ budgetMax: 100 }).some(event => event.id === sample.id), false);
+});
+
+test("catalog budget is applied before pagination and combines with state, city, date and category", async () => {
+  const ids: string[] = [];
+  for (let page = 1; ; page++) {
+    const response = await eventsRoute(new Request(`http://localhost/api/events?budgetMax=0&page=${page}`));
+    assert.equal(response.status, 200);
+    const body = await response.json();
+    ids.push(...body.events.map((event: EventData) => event.id));
+    assert.ok(body.events.every((event: EventData) => event.priceKnown && event.currency === "USD" && event.priceMin === 0));
+    if (!body.pagination.hasMore) break;
+  }
+  assert.deepEqual(ids, filterCatalogEvents({ budgetMax: 0 }).map(event => event.id));
+  const sample = filterCatalogEvents({ budgetMax: 0 }).find(event => event.city === "New York" && event.isRecurring)!;
+  const date = Array.from({ length: 7 }, (_, day) => addDays(getCityToday(), day)).find(date => catalogMatchesDate(sample, date))!;
+  assert.ok(date);
+  const query = new URLSearchParams({ state: sample.state, city: sample.city, category: sample.category, date, budgetMax: "0" });
+  const response = await eventsRoute(new Request(`http://localhost/api/events?${query}`));
+  assert.equal(response.status, 200);
+  const body = await response.json();
+  assert.ok(body.events.length > 0);
+  assert.ok(body.events.every((event: EventData) => event.state === sample.state && event.city === sample.city && event.category === sample.category && event.priceKnown && event.currency === "USD" && event.priceMin === 0 && catalogMatchesDate(event, date)));
 });
