@@ -12,14 +12,14 @@ import java.util.List;
 @ConfigurationProperties(prefix = "application")
 public class AppSettings {
 
-    /** Languages with a {@code messages_<lang>.properties} file. */
-    public static final List<String> SUPPORTED_LOCALES = List.of("ru", "en", "kk");
+    /** The API answers in English only ({@code messages.properties} / {@code messages_en.properties}). */
+    public static final List<String> SUPPORTED_LOCALES = List.of("en");
     private static final String FALLBACK_LOCALE = "en";
 
     private String defaultLocale = FALLBACK_LOCALE;
 
     /**
-     * Language of the current request ({@code ru}, {@code en} or {@code kk}), else the default.
+     * Language of the current request; always {@code en} while English is the only supported language.
      */
     public String getLocale() {
         String locale = LocaleContextHolder.getLocale().getLanguage();

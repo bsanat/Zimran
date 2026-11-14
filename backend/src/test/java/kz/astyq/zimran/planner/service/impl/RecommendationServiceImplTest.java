@@ -75,7 +75,7 @@ class RecommendationServiceImplTest {
                     pick("json:c2", 95, "Great"), pick("json:invented", 99, "Fake"),
                     pick("json:c2", 50, "Again"), pick("json:c0", 70, ""))));
 
-            Plan plan = service.recommend(request(null), set, "ru");
+            Plan plan = service.recommend(request(null), set, "en");
 
             assertThat(plan.isAiRanked()).isTrue();
             assertThat(plan.getRecommendations()).extracting(r -> r.getEvent().getId().asString())
@@ -88,7 +88,7 @@ class RecommendationServiceImplTest {
             assertThat(plan.getSuggestions()).containsExactly("AI tip");
             ArgumentCaptor<AiRankingRequest> captor = ArgumentCaptor.forClass(AiRankingRequest.class);
             verify(aiRankingService).rank(captor.capture());
-            assertThat(captor.getValue().getLanguage()).isEqualTo("ru");
+            assertThat(captor.getValue().getLanguage()).isEqualTo("en");
             assertThat(captor.getValue().getMaxPicks()).isEqualTo(5);
         }
 

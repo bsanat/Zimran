@@ -4,7 +4,6 @@ import {
   BUDGETS, createDefaultDraft, formatEventDate, formatPrice, getCityToday, getDateRange, INTERESTS, TIME_OPTIONS,
   isPlannerDraft, safeExternalUrl, toPlannerRequest, validateDraft,
 } from "../src/lib/planner.ts";
-import { plannerMessages } from "../src/lib/i18n-planner.ts";
 
 test("presets use the New York calendar, including midnight and year boundaries", () => {
   const now = new Date("2026-11-15T02:00:00Z");
@@ -81,32 +80,6 @@ test("event dates use venue time and unknown zones fall back to explicit UTC", (
   assert.equal(formatEventDate({ startAt: "bad", timezone: "America/New_York" }), "Date and time unavailable");
   assert.equal(formatEventDate({ startAt: null, dateText: "Nov 21 · 7:00 PM", timezone: "America/New_York" }), "Nov 21 · 7:00 PM");
   assert.equal(formatEventDate({ startAt: null, timezone: "America/New_York" }), "Date and time unavailable");
-});
-
-test("Russian and Kazakh date/price labels preserve venue time and source currency", () => {
-  const eventDate = { startAt: "2026-11-15T01:00:00Z", timezone: "America/New_York" };
-  assert.match(formatEventDate(eventDate, "ru"), /14 нояб.*20:00/);
-  assert.match(formatEventDate(eventDate, "kk"), /14.*20:00/);
-  const unknown = { priceKnown: false, priceMin: null, priceMax: null, currency: "USD" };
-  assert.equal(formatPrice(unknown, "ru"), "Цена не указана");
-  assert.equal(formatPrice(unknown, "kk"), "Бағасы көрсетілмеген");
-  assert.equal(formatPrice({ ...unknown, priceKnown: true, priceMin: 0, priceMax: 0 }, "kk"), "Тегін");
-  assert.match(formatPrice({ ...unknown, priceKnown: true, priceMin: 25 }, "ru"), /^От 25.*\$/);
-  assert.match(formatPrice({ ...unknown, priceKnown: true, priceMin: 25 }, "kk"), /25.*\$.*бастап$/);
-});
-
-test("all selectable planner labels and validation messages have Russian and Kazakh translations", () => {
-  const draft = { ...createDefaultDraft(), city: "Unsupported", budget: "invalid", notes: "x".repeat(501) };
-  const messages = [
-    ...INTERESTS.flatMap(({ label, detail }) => [label, detail]),
-    ...BUDGETS.map(({ label }) => label), ...TIME_OPTIONS.map(({ label }) => label),
-    ...Object.values(validateDraft(draft)),
-  ];
-  for (const message of messages) {
-    const translated = plannerMessages[message as keyof typeof plannerMessages];
-    assert.ok(translated?.[0], `Russian translation missing: ${message}`);
-    assert.ok(translated?.[1], `Kazakh translation missing: ${message}`);
-  }
 });
 
 test("source links only accept HTTPS Ticketmaster destinations", () => {

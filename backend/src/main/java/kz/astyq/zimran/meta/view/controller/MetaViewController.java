@@ -28,7 +28,7 @@ public class MetaViewController {
 
     @Operation(summary = "Reference data",
             description = "Event categories (the shared vocabulary of catalog, AI and alerts) with labels in the "
-                    + "requested language (outly-lang cookie, else Accept-Language).")
+                    + "English.")
     @ApiResponse(responseCode = "200", description = "Reference data")
     @GetMapping
     public ResponseEntity<MetaViewResponse> getMeta() {

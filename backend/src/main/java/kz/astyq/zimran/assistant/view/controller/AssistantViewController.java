@@ -39,8 +39,8 @@ public class AssistantViewController {
     @Operation(summary = "Read search filters from a message",
             description = "The AI only extracts; the server validates every field (supported city, known "
                     + "category slugs, dates from today in the city's timezone, budget >= 0). Invalid or missing "
-                    + "values are null and listed in missingFields; clarificationQuestion follows the outly-lang "
-                    + "cookie or Accept-Language. No guest session needed (X-Guest-Token is optional).")
+                    + "values are null and listed in missingFields; clarificationQuestion is in English. "
+                    + "No guest session needed (X-Guest-Token is optional).")
     @ApiResponse(responseCode = "200", description = "The filters")
     @ApiResponse(responseCode = "400", description = "Blank or too long message",
             content = @Content(schema = @Schema(implementation = ErrorResponse.class)))

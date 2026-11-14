@@ -4,7 +4,6 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import test from "node:test";
 import { CATALOG_EVENTS } from "../src/lib/catalog.ts";
-import { assistantMessages } from "../src/lib/i18n-assistant.ts";
 import { chatAssistant, parseAssistant, recommendCatalog, validateAssistantContext, validateAssistantPreferences } from "../src/lib/server/assistant.ts";
 import type { EventData } from "../src/types/event.ts";
 import type { PlannerRequest } from "../src/types/planner.ts";
@@ -29,21 +28,6 @@ test("assistant parses a natural-language message into editable strict filters",
   assert.equal(parsed.preferences?.timePreference, "evening");
 });
 
-test("assistant translates city, interest, weekdays and budgets in Russian and Kazakh", () => {
-  const ru = parseAssistant({ message: "Нью-Йорк, музыка в субботу вечером, до 60 долларов" }, now);
-  assert.equal(ru.preferences?.city, "New York");
-  assert.equal(ru.preferences?.budgetMax, 60);
-  assert.equal(ru.preferences?.timePreference, "evening");
-  const kk = parseAssistant({ message: "Нью-Йорк, ертең тегін өнер" }, now);
-  assert.equal(kk.preferences?.startDate, "2026-11-15");
-  assert.equal(kk.preferences?.budgetMax, 0);
-  assert.deepEqual(kk.preferences?.interests, ["art"]);
-  for (const sample of ["NYC, free games this Thursday", "New York, family activities this weekend", "New York, free running next Tuesday"]) {
-    const translated = assistantMessages[sample];
-    for (const text of [sample, ...translated]) assert.ok(parseAssistant({ message: text }, now).preferences, text);
-  }
-});
-
 test("assistant asks for missing or ambiguous fields and retains detected preferences", () => {
   const absent = parseAssistant({ message: "Jazz under $30" }, now);
   assert.equal(absent.preferences, null);
@@ -55,7 +39,6 @@ test("assistant asks for missing or ambiguous fields and retains detected prefer
   assert.equal(parseAssistant({ message: "NYC music tomorrow -$5" }, now).preferences, null);
   assert.equal(parseAssistant({ message: "NYC music tomorrow morning or evening" }, now).preferences, null);
   assert.equal(parseAssistant({ message: "London music tomorrow" }, now).preferences, null);
-  assert.equal(parseAssistant({ message: "Завтра в Нью-Йорке джаз до $60" }, now).preferences?.city, "New York");
 });
 
 test("assistant preserves New York dates at midnight and validates explicit date ranges", () => {
@@ -214,15 +197,15 @@ test("chat clears stale city, date and time when a replacement is ambiguous", ()
   assert.ok(answered.result?.recommendations.length);
 });
 
-test("chat accepts translated follow-ups and keeps notes bounded to the last message", () => {
-  const first = chatAssistant({ message: "Нью-Йорк, игры в четверг" }, now);
+test("chat accepts follow-ups and keeps notes bounded to the last message", () => {
+  const first = chatAssistant({ message: "NYC, games this Thursday" }, now);
   assert.ok(first.result?.recommendations.length);
-  const second = chatAssistant({ message: "тегін", preferences: first.preferences }, now);
+  const second = chatAssistant({ message: "free", preferences: first.preferences }, now);
   assert.equal(second.preferences.budgetMax, 0);
   assert.ok(second.result?.recommendations.length);
-  const third = chatAssistant({ message: "кез келген бюджет", preferences: second.preferences }, now);
+  const third = chatAssistant({ message: "any budget", preferences: second.preferences }, now);
   assert.equal(Object.hasOwn(third.preferences, "budgetMax"), false);
-  assert.equal(third.preferences.notes, "кез келген бюджет");
+  assert.equal(third.preferences.notes, "any budget");
   assert.ok(third.result?.recommendations.length);
 });
 

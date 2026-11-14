@@ -162,29 +162,10 @@ class GlobalExceptionHandlerTest {
     class Localization {
 
         @Test
-        void outlyLangCookieWins() {
+        void alwaysAnswersInEnglish() {
             MvcTestResult result = mvc.get().uri("/api/test/not-found")
                     .cookie(new jakarta.servlet.http.Cookie("outly-lang", "ru"))
-                    .header(HttpHeaders.ACCEPT_LANGUAGE, "kk")
-                    .exchange();
-
-            assertError(result, 404, "NOT_FOUND", "\u0417\u0430\u043f\u0440\u043e\u0448\u0435\u043d\u043d\u044b\u0439 \u0440\u0435\u0441\u0443\u0440\u0441 \u043d\u0435 \u043d\u0430\u0439\u0434\u0435\u043d.");
-        }
-
-        @Test
-        void acceptLanguageWhenNoCookie() {
-            MvcTestResult result = mvc.get().uri("/api/test/not-found")
                     .header(HttpHeaders.ACCEPT_LANGUAGE, "kk-KZ,ru;q=0.5")
-                    .exchange();
-
-            assertError(result, 404, "NOT_FOUND", "\u0421\u04b1\u0440\u0430\u043b\u0493\u0430\u043d \u0440\u0435\u0441\u0443\u0440\u0441 \u0442\u0430\u0431\u044b\u043b\u043c\u0430\u0434\u044b.");
-        }
-
-        @Test
-        void unsupportedLanguageFallsBackToEnglish() {
-            MvcTestResult result = mvc.get().uri("/api/test/not-found")
-                    .cookie(new jakarta.servlet.http.Cookie("outly-lang", "de"))
-                    .header(HttpHeaders.ACCEPT_LANGUAGE, "fr")
                     .exchange();
 
             assertError(result, 404, "NOT_FOUND", "The requested resource was not found.");

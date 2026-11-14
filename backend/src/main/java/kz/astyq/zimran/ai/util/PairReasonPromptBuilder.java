@@ -25,7 +25,7 @@ public final class PairReasonPromptBuilder {
     static final int VENUE_MAX = 150;
     static final int DESCRIPTION_MAX = 400;
 
-    private static final Map<String, String> LANGUAGES = Map.of("en", "English", "ru", "Russian", "kk", "Kazakh");
+    private static final Map<String, String> LANGUAGES = Map.of("en", "English");
 
     static final String SYSTEM_PROMPT = """
             You explain plans for two people going out together. You receive one JSON object with the preferences \
