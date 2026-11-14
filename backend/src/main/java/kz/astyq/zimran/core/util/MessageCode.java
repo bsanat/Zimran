@@ -13,6 +13,8 @@ public final class MessageCode {
     public static final String METHOD_NOT_ALLOWED = "method_not_allowed";
     public static final String PAYLOAD_TOO_LARGE = "payload_too_large";
     public static final String RATE_LIMITED = "rate_limited";
+    public static final String GUEST_TOKEN_MISSING = "guest_token_missing";
+    public static final String GUEST_TOKEN_INVALID = "guest_token_invalid";
     public static final String INTERNAL_ERROR = "internal_error";
 
     private MessageCode() {

@@ -1,5 +1,6 @@
 package kz.astyq.zimran.event.model.domain;
 
+import kz.astyq.zimran.event.model.enums.CategorySlug;
 import kz.astyq.zimran.event.model.enums.EventStatus;
 import kz.astyq.zimran.event.model.enums.Interest;
 import lombok.Builder;
@@ -69,6 +70,16 @@ public class Event {
     String priceText;
 
     boolean major;
+
+    /** A fictional sample event ({@code app.demo.enabled}); the frontend labels it "Sample / Demo". */
+    boolean demo;
+
+    /**
+     * The shared category of the event: the slug of its primary interest.
+     */
+    public CategorySlug getCategorySlug() {
+        return category.getCategorySlug();
+    }
 
     /**
      * Day of the event in {@code zone}: the start instant's day there when the time is known, else

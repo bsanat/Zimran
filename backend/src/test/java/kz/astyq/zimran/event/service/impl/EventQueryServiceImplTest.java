@@ -1,13 +1,19 @@
 package kz.astyq.zimran.event.service.impl;
 
+import kz.astyq.zimran.core.configuration.DemoProperties;
+import kz.astyq.zimran.event.mapper.CatalogEventMapper;
 import kz.astyq.zimran.event.model.domain.Event;
 import kz.astyq.zimran.event.model.domain.EventCriteria;
 import kz.astyq.zimran.event.model.domain.EventId;
 import kz.astyq.zimran.event.model.domain.EventSchedule;
 import kz.astyq.zimran.event.model.domain.TestEvents;
+import kz.astyq.zimran.event.model.entity.CatalogEvent;
+import kz.astyq.zimran.event.model.enums.CategorySlug;
 import kz.astyq.zimran.event.model.enums.EventSource;
+import kz.astyq.zimran.event.model.enums.EventStatus;
 import kz.astyq.zimran.event.model.enums.Interest;
-import kz.astyq.zimran.event.service.EventProvider;
+import kz.astyq.zimran.event.repository.CatalogEventRepository;
+import kz.astyq.zimran.event.service.CatalogRefreshService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -15,7 +21,10 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.mapstruct.factory.Mappers;
+import org.springframework.data.jpa.domain.Specification;
 
+import java.math.BigDecimal;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
@@ -30,6 +39,8 @@ import static kz.astyq.zimran.event.model.domain.TestEvents.NYC;
 import static kz.astyq.zimran.event.model.domain.TestEvents.event;
 import static kz.astyq.zimran.event.model.domain.TestEvents.eventAt;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -40,15 +51,19 @@ class EventQueryServiceImplTest {
 
     private static final LocalDate DAY = LocalDate.of(2026, 11, 20);
 
+    private final CatalogEventMapper mapper = Mappers.getMapper(CatalogEventMapper.class);
+    private final DemoProperties demoProperties = new DemoProperties();
+
     @Mock
-    private EventProvider provider;
+    private CatalogEventRepository repository;
+    @Mock
+    private CatalogRefreshService catalogRefreshService;
 
     private EventQueryServiceImpl service;
 
     @BeforeEach
     void setUp() {
-        lenient().when(provider.source()).thenReturn(EventSource.JSON);
-        service = new EventQueryServiceImpl(List.of(provider));
+        service = new EventQueryServiceImpl(repository, mapper, catalogRefreshService, demoProperties);
     }
 
     @Nested
@@ -176,40 +191,144 @@ class EventQueryServiceImplTest {
     }
 
     @Nested
+    @DisplayName("search: catalog rules")
+    class CatalogRules {
+
+        @Test
+        @DisplayName("loads an empty city live before querying")
+        void ensuresLoaded() {
+            events();
+
+            service.search(criteria().build());
+
+            verify(catalogRefreshService).ensureLoaded(NYC);
+        }
+
+        @Test
+        @DisplayName("cancelled and expired events are excluded unless includeInactive")
+        void inactive() {
+            events(eventAt("on", DAY, "19:00").build(),
+                    eventAt("postponed", DAY, "19:30").status(EventStatus.POSTPONED).build(),
+                    eventAt("cancelled", DAY, "20:00").status(EventStatus.CANCELLED).build(),
+                    eventAt("expired", DAY, "21:00").status(EventStatus.EXPIRED).build());
+
+            assertThat(ids(service.search(criteria().build()))).containsExactly("on", "postponed");
+            assertThat(ids(service.search(criteria().includeInactive(true).build())))
+                    .containsExactly("on", "postponed", "cancelled", "expired");
+        }
+
+        @Test
+        @DisplayName("categorySlug matches the slug of the primary interest")
+        void categorySlug() {
+            events(TestEvents.interests(eventAt("food", DAY, "19:00"), Interest.FOOD).build(),
+                    TestEvents.interests(eventAt("ai", DAY, "19:30"), Interest.AI).build(),
+                    eventAt("music", DAY, "20:00").build());
+
+            assertThat(ids(service.search(criteria().categorySlug(CategorySlug.FOOD_DRINKS).build())))
+                    .containsExactly("food");
+            assertThat(ids(service.search(criteria().categorySlug(CategorySlug.TECH).build()))).containsExactly("ai");
+        }
+
+        @Test
+        @DisplayName("budgetMax: lowest known price at most the budget; unknown price never passes")
+        void budgetMax() {
+            events(TestEvents.price(eventAt("cheap", DAY, "18:00"), "20", "60").build(),
+                    TestEvents.price(eventAt("exact", DAY, "19:00"), "30", null).build(),
+                    TestEvents.price(eventAt("pricey", DAY, "20:00"), "31", null).build(),
+                    eventAt("unknown", DAY, "21:00").build());
+
+            assertThat(ids(service.search(criteria().budgetMax(new BigDecimal("30")).build())))
+                    .containsExactly("cheap", "exact");
+        }
+
+        @Test
+        @DisplayName("freeOnly: only events the source says are free; unknown price never passes")
+        void freeOnly() {
+            events(TestEvents.price(eventAt("free", DAY, "18:00"), "0", "0").build(),
+                    TestEvents.price(eventAt("free-or-paid", DAY, "19:00"), "0", "25").build(),
+                    eventAt("unknown", DAY, "20:00").build());
+
+            assertThat(ids(service.search(criteria().freeOnly(true).build()))).containsExactly("free");
+            assertThat(ids(service.search(criteria().budgetMax(BigDecimal.ZERO).build())))
+                    .containsExactly("free", "free-or-paid");
+        }
+
+        @Test
+        @DisplayName("keeps the demo flag and the start in the venue timezone")
+        void roundTrip() {
+            events(eventAt("demo", DAY, "19:00").demo(true).build());
+
+            Event found = service.search(criteria().build()).getFirst();
+
+            assertThat(found.isDemo()).isTrue();
+            assertThat(found.getStartAt()).isEqualTo(TestEvents.at(DAY, "19:00"));
+        }
+    }
+
+    @Nested
     @DisplayName("findById")
     class FindById {
 
         @Test
-        @DisplayName("asks the provider of the id's source")
+        @DisplayName("reads the catalog row by provider + provider event id, any status")
         void found() {
-            Event event = event("e1").build();
-            when(provider.findById("e1")).thenReturn(Optional.of(event));
+            CatalogEvent row = mapper.toEntity(event("e1").status(EventStatus.EXPIRED).build());
+            when(repository.findByProviderAndProviderEventId("json", "e1")).thenReturn(Optional.of(row));
 
-            assertThat(service.findById(new EventId(EventSource.JSON, "e1"))).contains(event);
+            Optional<Event> found = service.findById(new EventId(EventSource.JSON, "e1"));
+
+            assertThat(found).map(e -> e.getId().asString()).contains("json:e1");
+            assertThat(found).map(Event::getStatus).contains(EventStatus.EXPIRED);
+            verify(catalogRefreshService, never()).importById(any());
         }
 
         @Test
-        @DisplayName("unknown id or null: empty")
-        void missing() {
-            when(provider.findById("nope")).thenReturn(Optional.empty());
+        @DisplayName("not in the catalog: imported from its provider")
+        void imported() {
+            EventId id = new EventId(EventSource.JSON, "new");
+            Event event = event("new").build();
+            when(repository.findByProviderAndProviderEventId("json", "new")).thenReturn(Optional.empty());
+            when(catalogRefreshService.importById(id)).thenReturn(Optional.of(event));
 
-            assertThat(service.findById(new EventId(EventSource.JSON, "nope"))).isEmpty();
+            assertThat(service.findById(id)).contains(event);
+        }
+
+        @Test
+        @DisplayName("a demo row is hidden while demo is disabled")
+        void demoHidden() {
+            CatalogEvent row = mapper.toEntity(event("d1").id(new EventId(EventSource.DEMO, "d1")).demo(true).build());
+            when(repository.findByProviderAndProviderEventId("demo", "d1")).thenReturn(Optional.of(row));
+
+            assertThat(service.findById(new EventId(EventSource.DEMO, "d1"))).isEmpty();
+            demoProperties.setEnabled(true);
+            assertThat(service.findById(new EventId(EventSource.DEMO, "d1"))).map(Event::isDemo).contains(true);
+        }
+
+        @Test
+        @DisplayName("null id: empty")
+        void missing() {
             assertThat(service.findById(null)).isEmpty();
-            verify(provider, never()).getAll();
+            verify(repository, never()).findByProviderAndProviderEventId(anyString(), anyString());
         }
     }
 
     @Test
-    @DisplayName("coveredInterests: every interest of the city's events")
+    @DisplayName("coveredInterests: every interest of the active rows the catalog returns for the city")
     void coveredInterests() {
         events(TestEvents.interests(event("a"), Interest.MUSIC, Interest.FOOD).build(),
-                TestEvents.interests(event("b"), Interest.ART).city("Boston").build());
+                TestEvents.interests(event("b"), Interest.ART).build());
 
-        assertThat(service.coveredInterests(NYC)).isEqualTo(EnumSet.of(Interest.MUSIC, Interest.FOOD));
+        assertThat(service.coveredInterests(NYC)).isEqualTo(EnumSet.of(Interest.MUSIC, Interest.FOOD, Interest.ART));
+        verify(catalogRefreshService).ensureLoaded(NYC);
     }
 
+    /**
+     * The rows the SQL pre-filter returns: all of them, so the in-memory rules are what is tested here.
+     */
+    @SuppressWarnings("unchecked")
     private void events(Event... events) {
-        when(provider.getAll()).thenReturn(new ArrayList<>(List.of(events)));
+        List<CatalogEvent> rows = new ArrayList<>(List.of(events).stream().map(mapper::toEntity).toList());
+        lenient().when(repository.findAll(any(Specification.class))).thenReturn(rows);
     }
 
     private static EventCriteria.EventCriteriaBuilder criteria() {

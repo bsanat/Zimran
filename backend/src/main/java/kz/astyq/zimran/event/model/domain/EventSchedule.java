@@ -4,6 +4,7 @@ import lombok.Builder;
 import lombok.NonNull;
 import lombok.Singular;
 import lombok.Value;
+import lombok.extern.jackson.Jacksonized;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
@@ -20,6 +21,7 @@ import java.util.Set;
  */
 @Value
 @Builder
+@Jacksonized
 public class EventSchedule {
 
     /** How far ahead an open-ended schedule is searched for its next day. */

@@ -65,13 +65,27 @@ class RankingResponseSchemaTest {
     @DisplayName("responseFormat: strict json_schema requiring summary, recommendations and suggestions")
     @SuppressWarnings("unchecked")
     void responseFormat() {
-        Map<String, Object> format = RankingResponseSchema.responseFormat();
+        Map<String, Object> format = RankingResponseSchema.responseFormat(true);
         Map<String, Object> jsonSchema = (Map<String, Object>) format.get("json_schema");
         Map<String, Object> schema = (Map<String, Object>) jsonSchema.get("schema");
 
         assertThat(format.get("type")).isEqualTo("json_schema");
         assertThat(jsonSchema.get("strict")).isEqualTo(true);
         assertThat((Iterable<String>) schema.get("required")).containsExactly("summary", "recommendations", "suggestions");
+    }
+
+    @Test
+    @DisplayName("responseFormat without suggestions: only summary and picks (eventId, matchScore, reason) allowed")
+    @SuppressWarnings("unchecked")
+    void responseFormatWithoutSuggestions() {
+        Map<String, Object> schema = (Map<String, Object>) ((Map<String, Object>) RankingResponseSchema
+                .responseFormat(false).get("json_schema")).get("schema");
+
+        assertThat((Iterable<String>) schema.get("required")).containsExactly("summary", "recommendations");
+        assertThat((Map<String, Object>) schema.get("properties")).containsOnlyKeys("summary", "recommendations");
+        assertThat(schema.get("additionalProperties")).isEqualTo(false);
+        assertThat(parse("{\"summary\": \"x\", \"recommendations\": []}")).hasValueSatisfying(ranking ->
+                assertThat(ranking.getSuggestions()).isEmpty());
     }
 
     private static Optional<AiRanking> parse(String json) {

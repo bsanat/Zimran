@@ -22,6 +22,8 @@ application:
   default-locale: en
 
 app:
+  # Public frontend address; Pair invite links are built from it.
+  frontend-url: ${FRONTEND_URL:http://localhost:3000}
   city:
     default-id: nyc
     # Every city of the event feed (data/events.json); a city missing here gets no search results.
@@ -377,6 +379,56 @@ app:
     total-timeout: 18s
     max-output-tokens: 2000
     max-requests-per-minute: ${OPENAI_MAX_REQUESTS_PER_MINUTE:30}
+  guest:
+    # HMAC-SHA256 key for X-Guest-Token, at least 32 bytes. Blank = random per process (dev only).
+    token-secret: ${GUEST_TOKEN_SECRET:}
+    token-ttl: ${GUEST_TOKEN_TTL:7d}
+    last-seen-update-interval: 5m
+  subscription:
+    plan:
+      price-cents: 999
+      currency: USD
+      interval: month
+      # Labels: messages subscription_feature_<id>
+      features: [assistant, pair, alerts, buddy]
+    # Product hypotheses. window: aligned to the epoch; no window = once ever (a trial).
+    quotas:
+      assistant:
+        free: { limit: 1, window: 7d }
+        premium: { limit: 30, window: 1d }
+      pair:
+        free: { limit: 1 }
+        premium: { limit: 20, window: 1d }
+  demo:
+    # Also seeds fictional NYC sample events (provider "demo", isDemo = true) at startup.
+    enabled: ${DEMO_ENABLED:false}
+  ingestion:
+    # Scheduled ingestion of every supported city into the events table (Spring cron, 6 fields).
+    enabled: ${EVENT_INGESTION_ENABLED:true}
+    cron: ${EVENT_INGESTION_CRON:0 */15 * * * *}
+    # A city with no provider events in the catalog is fetched live at most this often.
+    live-fetch-cooldown: 1m
+  rate-limit:
+    enabled: true
+    max-tracked-keys: 50000
+    # Token bucket per action and caller (scope, or client address before a guest exists):
+    # capacity = burst, refilled continuously over refill-period.
+    actions:
+      guest-session: { capacity: 10, refill-period: 1m }
+      ai-parse: { capacity: 10, refill-period: 1m }
+      ai-recommend: { capacity: 10, refill-period: 1m }
+      pair-create: { capacity: 5, refill-period: 1m }
+      buddy-post: { capacity: 5, refill-period: 1h }
+      buddy-request: { capacity: 20, refill-period: 1h }
+      alerts-check: { capacity: 6, refill-period: 1m }
+  ai:
+    # AI assistant (POST /api/ai/recommend): events sent to the model per recommendation.
+    max-candidates: 20
+  pair:
+    # How long a Pair invite stays open before the session EXPIRES.
+    invite-ttl: ${PAIR_INVITE_TTL:48h}
+    min-suggestions: 3
+    max-suggestions: 5
   planner:
     max-candidates: 30
     max-recommendations: 5

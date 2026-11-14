@@ -7,7 +7,8 @@ import lombok.Value;
 import java.util.List;
 
 /**
- * What the model ranks: the guest's preferences and the candidate events. {@code notes} is untrusted guest text.
+ * What the model ranks: the guest's preferences and the candidate events. {@code notes} and {@code message} are
+ * untrusted guest text.
  */
 @Value
 @Builder
@@ -29,7 +30,11 @@ public class AiRankingRequest {
     /** e.g. {@code up to 50 USD}, {@code free only}; null = no limit. */
     String budget;
     String notes;
+    /** The guest's original free-text request, when there is one (AI assistant); null otherwise. */
+    String message;
     @NonNull
     List<AiCandidate> candidates;
     int maxPicks;
+    /** Whether the model also writes tips for the guest; false = the answer schema has no suggestions. */
+    boolean withSuggestions;
 }

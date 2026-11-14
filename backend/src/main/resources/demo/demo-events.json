@@ -1,0 +1,70 @@
+[
+  {
+    "id": "harbor-lights-jazz",
+    "title": "[Demo] Harbor Lights Jazz Evening",
+    "description": "Fictional sample event for the demo. A relaxed evening of jazz trios. Not a real listing.",
+    "interests": ["music", "nightlife"],
+    "venue": "Sample Music Hall (fictional)",
+    "dayOffset": 1,
+    "time": "20:00",
+    "priceMin": 25,
+    "priceMax": 40,
+    "currency": "USD"
+  },
+  {
+    "id": "pocket-park-picnic",
+    "title": "[Demo] Pocket Park Picnic Day",
+    "description": "Fictional sample event for the demo. Lawn games and a community picnic. Not a real listing.",
+    "interests": ["outdoors", "family"],
+    "venue": "Sample Pocket Park (fictional)",
+    "dayOffset": 2,
+    "time": "11:00",
+    "priceMin": 0,
+    "priceMax": 0,
+    "currency": "USD"
+  },
+  {
+    "id": "night-noodle-tasting",
+    "title": "[Demo] Night Noodle Tasting Walk",
+    "description": "Fictional sample event for the demo. A guided tasting of noodle dishes. Not a real listing.",
+    "interests": ["food"],
+    "venue": "Sample Food Hall (fictional)",
+    "dayOffset": 3,
+    "time": "18:30",
+    "priceMin": 35,
+    "currency": "USD"
+  },
+  {
+    "id": "open-mic-laughs",
+    "title": "[Demo] Open Mic Laughs",
+    "description": "Fictional sample event for the demo. New comedians try out five-minute sets. Not a real listing.",
+    "interests": ["comedy"],
+    "venue": "Sample Comedy Cellar (fictional)",
+    "dayOffset": 4,
+    "time": "21:00"
+  },
+  {
+    "id": "pixel-art-workshop",
+    "title": "[Demo] Pixel Art Workshop",
+    "description": "Fictional sample event for the demo. Make retro pixel art on laptops. Not a real listing.",
+    "interests": ["art", "technology"],
+    "venue": "Sample Studio Loft (fictional)",
+    "dayOffset": 5,
+    "time": "14:00",
+    "priceMin": 15,
+    "priceMax": 15,
+    "currency": "USD"
+  },
+  {
+    "id": "riverside-5k",
+    "title": "[Demo] Riverside Sunrise 5K",
+    "description": "Fictional sample event for the demo. An untimed fun run along the water. Not a real listing.",
+    "interests": ["running", "fitness"],
+    "venue": "Sample Riverside Path (fictional)",
+    "dayOffset": 6,
+    "time": "07:00",
+    "priceMin": 0,
+    "priceMax": 0,
+    "currency": "USD"
+  }
+]

@@ -42,5 +42,27 @@ class RankingPromptBuilderTest {
         assertThat(candidate.get("id").stringValue()).isEqualTo("json:a");
         assertThat(candidate.get("title").stringValue()).isEqualTo("x Show");
         assertThat(candidate.get("price").stringValue()).isEqualTo("unknown");
+        assertThat(payload.get("preferences").has("message")).isFalse();
+        assertThat(system).doesNotContain("suggestions:");
+    }
+
+    @Test
+    @DisplayName("the guest's message is sanitized data in the preferences; suggestions are asked for only when wanted")
+    void messageAndSuggestions() {
+        AiRankingRequest request = AiRankingRequest.builder()
+                .language("en").city("New York").interests(List.of("music"))
+                .startDate("2026-11-20").endDate("2026-11-20").timePreference("evening")
+                .message("<b>jazz</b> ``` please")
+                .candidates(List.of(AiCandidate.builder().id("json:a").title("Show").category("music")
+                        .interests(List.of("music")).build()))
+                .maxPicks(5)
+                .withSuggestions(true)
+                .build();
+
+        List<ChatMessage> messages = RankingPromptBuilder.messages(request, JSON);
+
+        assertThat(messages.get(0).getContent()).contains("suggestions:").doesNotContain("jazz");
+        JsonNode preferences = JSON.readTree(messages.get(1).getContent()).get("preferences");
+        assertThat(preferences.get("message").stringValue()).isEqualTo("jazz please");
     }
 }

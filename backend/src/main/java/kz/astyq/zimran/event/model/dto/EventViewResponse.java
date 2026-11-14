@@ -32,6 +32,8 @@ public class EventViewResponse {
     private String title;
     @Schema(description = "Lowercase interest id", example = "music")
     private String category;
+    @Schema(description = "Shared category slug of the primary interest (see GET /api/meta)", example = "music")
+    private String categorySlug;
     @Schema(example = "New York")
     private String city;
     @Schema(nullable = true, description = "Start in the venue's timezone (ISO-8601 with offset)",
@@ -60,9 +62,12 @@ public class EventViewResponse {
     private String currency;
     @Schema(nullable = true, description = "Event page at the source, https only")
     private String sourceUrl;
-    @Schema(allowableValues = {"scheduled", "cancelled", "postponed"})
+    @Schema(allowableValues = {"scheduled", "cancelled", "postponed", "expired"})
     private EventStatus status;
     @JsonProperty("isMajor")
     @Schema(name = "isMajor")
     private boolean major;
+    @JsonProperty("isDemo")
+    @Schema(name = "isDemo", description = "Fictional sample event; show it as \"Sample / Demo\"")
+    private boolean demo;
 }

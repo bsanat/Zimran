@@ -152,6 +152,70 @@ class RecommendationServiceImplTest {
             assertThat(plan.getId()).isNotNull();
             verifyNoInteractions(aiRankingService);
         }
+
+        @Test
+        @DisplayName("asks the model for suggestions")
+        void withSuggestions() {
+            when(aiRankingService.rank(any())).thenReturn(Optional.of(ranking()));
+
+            service.recommend(request(null), candidates(1), "en");
+
+            ArgumentCaptor<AiRankingRequest> captor = ArgumentCaptor.forClass(AiRankingRequest.class);
+            verify(aiRankingService).rank(captor.capture());
+            assertThat(captor.getValue().isWithSuggestions()).isTrue();
+        }
+    }
+
+    @Nested
+    @DisplayName("recommendByAi")
+    class RecommendByAi {
+
+        @Test
+        @DisplayName("AI picks are filtered like the planner's; no suggestions asked for; the message reaches the model")
+        void ok() {
+            CandidateSet set = candidates(3);
+            when(aiRankingService.rank(any())).thenReturn(Optional.of(ranking(
+                    pick("json:c1", 120, "Fits"), pick("json:invented", 99, "Fake"), pick("json:c1", 10, "Again"))));
+            ValidatedPlanRequest request = request(null).toBuilder().message("jazz please").build();
+
+            Optional<Plan> plan = service.recommendByAi(request, set, "en");
+
+            assertThat(plan).hasValueSatisfying(p -> {
+                assertThat(p.isAiRanked()).isTrue();
+                assertThat(p.getRecommendations()).singleElement().satisfies(r -> {
+                    assertThat(r.getEvent()).isSameAs(set.getCandidates().get(1).getEvent());
+                    assertThat(r.getMatchScore()).isEqualTo(100);
+                    assertThat(r.getReason()).isEqualTo("Fits");
+                });
+            });
+            ArgumentCaptor<AiRankingRequest> captor = ArgumentCaptor.forClass(AiRankingRequest.class);
+            verify(aiRankingService).rank(captor.capture());
+            assertThat(captor.getValue().isWithSuggestions()).isFalse();
+            assertThat(captor.getValue().getMessage()).isEqualTo("jazz please");
+            verifyNoInteractions(fallbackRankingService);
+        }
+
+        @Test
+        @DisplayName("AI unavailable, only invented picks, or no candidates: empty, never the rule-based ranking")
+        void empty() {
+            when(aiRankingService.rank(any()))
+                    .thenReturn(Optional.empty())
+                    .thenReturn(Optional.of(ranking(pick("json:nope", 90, "x"))));
+
+            assertThat(service.recommendByAi(request(null), candidates(2), "en")).isEmpty();
+            assertThat(service.recommendByAi(request(null), candidates(2), "en")).isEmpty();
+            assertThat(service.recommendByAi(request(null), candidates(0), "en")).isEmpty();
+            verifyNoInteractions(fallbackRankingService);
+        }
+
+        @Test
+        @DisplayName("a valid answer with no picks is kept")
+        void nothingFits() {
+            when(aiRankingService.rank(any())).thenReturn(Optional.of(ranking()));
+
+            assertThat(service.recommendByAi(request(null), candidates(2), "en"))
+                    .hasValueSatisfying(p -> assertThat(p.getRecommendations()).isEmpty());
+        }
     }
 
     private static ValidatedPlanRequest request(String notes) {

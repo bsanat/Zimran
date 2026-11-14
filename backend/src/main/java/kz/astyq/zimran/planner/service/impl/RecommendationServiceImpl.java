@@ -38,17 +38,9 @@ public class RecommendationServiceImpl implements RecommendationService {
 
     @Override
     public Plan recommend(ValidatedPlanRequest request, CandidateSet candidateSet, String language) {
-        List<Candidate> candidates = candidateSet.getCandidates();
-        int max = plannerProperties.getMaxRecommendations();
-
-        Optional<AiRanking> ranking = candidates.isEmpty() ? Optional.empty()
-                : aiRankingService.rank(AiRankingRequestFactory.create(request, candidates, language, max));
-        if (ranking.isPresent()) {
-            Optional<Plan> aiPlan = fromAi(ranking.get(), request, candidateSet);
-            if (aiPlan.isPresent()) {
-                return aiPlan.get();
-            }
-            log.warn("AI picked no valid candidate; using the rule-based ranking");
+        Optional<Plan> aiPlan = aiPlan(request, candidateSet, language, true);
+        if (aiPlan.isPresent()) {
+            return aiPlan.get();
         }
 
         List<Recommendation> recommendations = fallbackRankingService.rank(candidateSet, request);
@@ -63,6 +55,29 @@ public class RecommendationServiceImpl implements RecommendationService {
                 .suggestions(limit(suggestions))
                 .aiRanked(false)
                 .build();
+    }
+
+    @Override
+    public Optional<Plan> recommendByAi(ValidatedPlanRequest request, CandidateSet candidateSet, String language) {
+        return aiPlan(request, candidateSet, language, false);
+    }
+
+    private Optional<Plan> aiPlan(ValidatedPlanRequest request, CandidateSet candidateSet, String language,
+                                  boolean withSuggestions) {
+        List<Candidate> candidates = candidateSet.getCandidates();
+        if (candidates.isEmpty()) {
+            return Optional.empty();
+        }
+        Optional<AiRanking> ranking = aiRankingService.rank(AiRankingRequestFactory.create(request, candidates,
+                language, plannerProperties.getMaxRecommendations(), withSuggestions));
+        if (ranking.isEmpty()) {
+            return Optional.empty();
+        }
+        Optional<Plan> plan = fromAi(ranking.get(), request, candidateSet);
+        if (plan.isEmpty()) {
+            log.warn("AI picked no valid candidate");
+        }
+        return plan;
     }
 
     /**
