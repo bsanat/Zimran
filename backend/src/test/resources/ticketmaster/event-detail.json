@@ -1,0 +1,56 @@
+{
+  "name": "Jazz at the Village Vanguard",
+  "type": "event",
+  "id": "vvG1zZ9KbGkM1a",
+  "test": false,
+  "url": "https://www.ticketmaster.com/event/vvG1zZ9KbGkM1a",
+  "locale": "en-us",
+  "description": "An intimate evening of bebop in the West Village.",
+  "info": "Two sets nightly.",
+  "pleaseNote": "21+ only. Two drink minimum.",
+  "images": [
+    {
+      "ratio": "16_9",
+      "url": "https://s1.ticketm.net/dam/a/123/jazz_16_9_1024.jpg",
+      "width": 1024,
+      "height": 576,
+      "fallback": false
+    }
+  ],
+  "dates": {
+    "start": {
+      "localDate": "2026-11-20",
+      "localTime": "20:00:00",
+      "dateTime": "2026-11-21T01:00:00Z",
+      "dateTBD": false,
+      "dateTBA": false,
+      "timeTBA": false,
+      "noSpecificTime": false
+    },
+    "timezone": "America/New_York",
+    "status": { "code": "onsale" }
+  },
+  "classifications": [
+    {
+      "primary": true,
+      "segment": { "name": "Music" },
+      "genre": { "name": "Jazz" },
+      "subGenre": { "name": "Bebop" }
+    }
+  ],
+  "priceRanges": [
+    { "type": "standard", "currency": "USD", "min": 35.0, "max": 89.5 }
+  ],
+  "_embedded": {
+    "venues": [
+      {
+        "name": "Village Vanguard",
+        "postalCode": "10014",
+        "timezone": "America/New_York",
+        "city": { "name": "New York" },
+        "state": { "name": "New York", "stateCode": "NY" },
+        "address": { "line1": "178 7th Ave S" }
+      }
+    ]
+  }
+}

@@ -9,7 +9,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @Configuration
 @RequiredArgsConstructor
-public class CorsConfig implements WebMvcConfigurer {
+public class WebConfig implements WebMvcConfigurer {
 
     private final CorsProperties corsProperties;
 

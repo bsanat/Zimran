@@ -31,6 +31,11 @@ public class PlannerProperties {
     @Positive
     private int maxRangeDays = 7;
 
+    /**
+     * Whether events without a known price stay in the candidate set (shown as "price unknown").
+     */
+    private boolean includeUnknownPrice = true;
+
     @AssertTrue(message = "max-recommendations must not exceed max-candidates")
     public boolean isRecommendationsWithinCandidates() {
         return maxRecommendations <= maxCandidates;
