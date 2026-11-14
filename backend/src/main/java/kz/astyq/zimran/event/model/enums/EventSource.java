@@ -5,11 +5,11 @@ import java.util.Locale;
 import java.util.Optional;
 
 /**
- * Upstream provider an event comes from. {@link #getCode()} is the prefix of public event ids
- * ({@code ticketmaster:<id>}).
+ * Where an event comes from. {@link #getCode()} is the {@code source} field and the prefix of public event ids
+ * ({@code json:<sourceEventId>}).
  */
 public enum EventSource {
-    TICKETMASTER;
+    JSON;
 
     public String getCode() {
         return name().toLowerCase(Locale.ROOT);

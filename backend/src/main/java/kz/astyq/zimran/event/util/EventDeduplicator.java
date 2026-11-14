@@ -17,7 +17,7 @@ import java.util.regex.Pattern;
 
 /**
  * Removes duplicate events: first the same {@link EventId}, then the same listing under different ids
- * (same title ignoring case and punctuation, same venue ignoring case, same start minute). Of each group the
+ * (same title ignoring case and punctuation, same venue ignoring case, same start minute or day). Of each group the
  * first event with a known price is kept, else the first event; the result keeps first-occurrence order.
  */
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
@@ -40,8 +40,21 @@ public final class EventDeduplicator {
      */
     public static String contentKey(Event event) {
         String venue = event.getVenue() != null ? normalize(event.getVenue()) : "";
-        return normalizeTitle(event.getTitle()) + '|' + venue + '|'
-                + event.getStartAt().toInstant().truncatedTo(ChronoUnit.MINUTES);
+        return normalizeTitle(event.getTitle()) + '|' + venue + '|' + when(event);
+    }
+
+    /**
+     * Start minute when the time is known, else the day, else the raw date text (an undated event only
+     * matches another undated one with the same text).
+     */
+    private static String when(Event event) {
+        if (event.getStartAt() != null) {
+            return event.getStartAt().toInstant().truncatedTo(ChronoUnit.MINUTES).toString();
+        }
+        if (event.getLocalDate() != null) {
+            return event.getLocalDate().toString();
+        }
+        return "?" + (event.getDateText() != null ? normalize(event.getDateText()) : "");
     }
 
     static String normalizeTitle(String title) {

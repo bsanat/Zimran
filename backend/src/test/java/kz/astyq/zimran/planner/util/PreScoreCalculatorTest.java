@@ -1,9 +1,7 @@
 package kz.astyq.zimran.planner.util;
 
 import kz.astyq.zimran.event.model.domain.Event;
-import kz.astyq.zimran.event.model.domain.EventId;
-import kz.astyq.zimran.event.model.enums.EventSource;
-import kz.astyq.zimran.event.model.enums.EventStatus;
+import kz.astyq.zimran.event.model.domain.TestEvents;
 import kz.astyq.zimran.event.model.enums.Interest;
 import kz.astyq.zimran.planner.model.enums.BudgetFit;
 import org.junit.jupiter.api.DisplayName;
@@ -130,14 +128,8 @@ class PreScoreCalculatorTest {
     }
 
     private static Event.EventBuilder base() {
-        return Event.builder()
-                .id(new EventId(EventSource.TICKETMASTER, "e1"))
+        return TestEvents.event("e1")
                 .title("Show")
-                .sourceUrl("https://www.ticketmaster.com/e1")
-                .startAt(OffsetDateTime.parse("2026-11-20T19:00:00-05:00"))
-                .timezone(NEW_YORK)
-                .status(EventStatus.SCHEDULED)
-                .category("Music")
-                .interests(List.of(Interest.MUSIC));
+                .startAt(OffsetDateTime.parse("2026-11-20T19:00:00-05:00"));
     }
 }

@@ -27,10 +27,14 @@ public class PlanCreateRequest {
     @Schema(description = "Supported city, by name or id", example = "New York", requiredMode = Schema.RequiredMode.REQUIRED)
     private String city;
 
-    @Schema(description = "At least one interest; duplicates are ignored", requiredMode = Schema.RequiredMode.REQUIRED)
+    @Schema(description = "State code of the city; needed only when two cities share a name (e.g. Portland)",
+            example = "NY")
+    private String state;
+
+    @Schema(description = "At least one interest id (e.g. music); duplicates are ignored", requiredMode = Schema.RequiredMode.REQUIRED)
     private List<Interest> interests;
 
-    @Schema(description = "First day, inclusive; today up to 90 days ahead", type = "string", format = "date",
+    @Schema(description = "First day, inclusive; today or later", type = "string", format = "date",
             example = "2026-11-20", requiredMode = Schema.RequiredMode.REQUIRED)
     private LocalDate startDate;
 
@@ -38,11 +42,11 @@ public class PlanCreateRequest {
             format = "date")
     private LocalDate endDate;
 
-    @Schema(description = "Maximum price per ticket in USD, 0..10000 with at most 2 decimals; null = no limit, "
+    @Schema(description = "Maximum price per ticket in USD, >= 0; absent = no limit, "
             + "0 = free events only", example = "50")
     private BigDecimal budgetMax;
 
-    @Schema(description = "Preferred time of day; default ANY")
+    @Schema(description = "Preferred time of day (any, morning, afternoon, evening); default any")
     private TimePreference timePreference;
 
     @Schema(description = "Free-text wishes, at most 500 characters")

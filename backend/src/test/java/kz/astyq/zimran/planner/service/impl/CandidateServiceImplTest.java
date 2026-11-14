@@ -3,8 +3,8 @@ package kz.astyq.zimran.planner.service.impl;
 import kz.astyq.zimran.city.model.domain.SupportedCity;
 import kz.astyq.zimran.core.configuration.PlannerProperties;
 import kz.astyq.zimran.event.model.domain.Event;
-import kz.astyq.zimran.event.model.domain.EventId;
-import kz.astyq.zimran.event.model.enums.EventSource;
+import kz.astyq.zimran.event.model.domain.EventCriteria;
+import kz.astyq.zimran.event.model.domain.TestEvents;
 import kz.astyq.zimran.event.model.enums.EventStatus;
 import kz.astyq.zimran.event.model.enums.Interest;
 import kz.astyq.zimran.event.service.EventQueryService;
@@ -21,6 +21,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -73,15 +74,21 @@ class CandidateServiceImplTest {
     class BuildCandidates {
 
         @Test
-        @DisplayName("queries the city's events for the requested range and interests")
+        @DisplayName("queries the city's dated events for the requested range and interests")
         void queriesEvents() {
             ValidatedPlanRequest request = request().endDate(TODAY.plusDays(2)).build();
-            when(eventQueryService.findEvents(NYC, TODAY, TODAY.plusDays(2), Set.of(Interest.MUSIC)))
-                    .thenReturn(List.of());
+            when(eventQueryService.search(any())).thenReturn(List.of());
             when(hintService.buildHints(any(), any())).thenReturn(List.of("hint"));
 
             CandidateSet result = service.buildCandidates(request);
 
+            ArgumentCaptor<EventCriteria> criteria = ArgumentCaptor.forClass(EventCriteria.class);
+            verify(eventQueryService).search(criteria.capture());
+            assertThat(criteria.getValue().getCity()).isEqualTo(NYC);
+            assertThat(criteria.getValue().getFromDate()).isEqualTo(TODAY);
+            assertThat(criteria.getValue().getToDate()).isEqualTo(TODAY.plusDays(2));
+            assertThat(criteria.getValue().getInterests()).containsExactly(Interest.MUSIC);
+            assertThat(criteria.getValue().isIncludeUndated()).isFalse();
             assertThat(result.getCandidates()).isEmpty();
             assertThat(result.getStats().getTotal()).isZero();
             assertThat(result.getHints()).containsExactly("hint");
@@ -91,8 +98,7 @@ class CandidateServiceImplTest {
         @DisplayName("cancelled and postponed events are excluded")
         void notScheduledExcluded() {
             ValidatedPlanRequest request = request().build();
-            events(request,
-                    event("ok", "Open", at(TODAY, "19:00"), "Hall").build(),
+            events(event("ok", "Open", at(TODAY, "19:00"), "Hall").build(),
                     event("c", "Cancelled", at(TODAY, "19:00"), "Hall").status(EventStatus.CANCELLED).build(),
                     event("p", "Postponed", at(TODAY, "19:00"), "Hall").status(EventStatus.POSTPONED).build());
 
@@ -111,12 +117,11 @@ class CandidateServiceImplTest {
                     .budgetMax(new BigDecimal("25"))
                     .timePreference(TimePreference.EVENING)
                     .build();
-            events(request,
-                    // cancelled and also past: counted as notScheduled only
+            events(// cancelled and also past: counted as notScheduled only
                     event("cancelled-past", "A", at(TODAY, "08:00"), "V1").status(EventStatus.CANCELLED).build(),
                     event("past", "B", at(TODAY, "09:00"), "V1").build(),
                     event("outside", "C", at(TODAY.plusDays(2), "19:00"), "V1").build(),
-                    event("sports", "D", at(TODAY, "19:00"), "V1").interests(List.of(Interest.SPORTS)).build(),
+                    event("sports", "D", at(TODAY, "19:00"), "V1").interests(Interest.SPORTS).build(),
                     event("afternoon", "E", at(TODAY, "13:00"), "V1").build(),
                     event("pricey", "F", at(TODAY, "19:00"), "V1").price("40").build(),
                     event("cheap", "G", at(TODAY, "19:00"), "V2").price("20").build(),
@@ -127,27 +132,59 @@ class CandidateServiceImplTest {
 
             assertThat(result.getStats()).usingRecursiveComparison().isEqualTo(FilterStats.builder()
                     .total(8).notScheduled(1).past(1).outsideRange(1).noInterestMatch(1).wrongTimeOfDay(1)
-                    .overBudget(1).build());
-            assertThat(ids(result)).containsExactly("cheap", "unknown");
+                    .overBudget(2).build());
+            assertThat(ids(result)).containsExactly("cheap");
             Candidate cheap = result.getCandidates().getFirst();
             assertThat(cheap.getBudgetFit()).isEqualTo(BudgetFit.WITHIN);
             assertThat(cheap.getTimeOfDay()).isEqualTo(TimeOfDay.EVENING);
             assertThat(cheap.getMatchedInterests()).containsExactly(Interest.MUSIC);
-            assertThat(result.getCandidates().get(1).getBudgetFit()).isEqualTo(BudgetFit.UNKNOWN);
         }
 
         @Test
-        @DisplayName("unknown prices are excluded when includeUnknownPrice is false")
-        void unknownPriceExcluded() {
-            plannerProperties.setIncludeUnknownPrice(false);
-            ValidatedPlanRequest request = request().budgetMax(new BigDecimal("25")).build();
-            events(request, event("unknown", "A", at(TODAY, "19:00"), "V").build());
+        @DisplayName("with a budget an unknown price never passes; without one it stays as UNKNOWN")
+        void unknownPrice() {
+            ValidatedPlanRequest withBudget = request().budgetMax(new BigDecimal("25")).build();
+            events(event("unknown", "A", at(TODAY, "19:00"), "V").build());
+            when(hintService.buildHints(any(), any())).thenReturn(List.of());
+
+            CandidateSet limited = service.buildCandidates(withBudget);
+            CandidateSet unlimited = service.buildCandidates(request().build());
+
+            assertThat(limited.getCandidates()).isEmpty();
+            assertThat(limited.getStats().getOverBudget()).isEqualTo(1);
+            assertThat(unlimited.getCandidates()).singleElement()
+                    .extracting(Candidate::getBudgetFit).isEqualTo(BudgetFit.UNKNOWN);
+        }
+
+        @Test
+        @DisplayName("free only (budget 0): only a known USD price of 0 passes")
+        void freeOnly() {
+            ValidatedPlanRequest request = request().budgetMax(BigDecimal.ZERO).build();
+            events(event("free", "A", at(TODAY, "19:00"), "V1").price("0").build(),
+                    event("paid", "B", at(TODAY, "19:00"), "V2").price("5").build(),
+                    event("unknown", "C", at(TODAY, "19:00"), "V3").build());
             when(hintService.buildHints(any(), any())).thenReturn(List.of());
 
             CandidateSet result = service.buildCandidates(request);
 
-            assertThat(result.getCandidates()).isEmpty();
-            assertThat(result.getStats().getOverBudget()).isEqualTo(1);
+            assertThat(ids(result)).containsExactly("free");
+            assertThat(result.getStats().getOverBudget()).isEqualTo(2);
+        }
+
+        @Test
+        @DisplayName("an event without a known time passes ANY but no specific time of day")
+        void unknownTime() {
+            Event dateOnly = TestEvents.event("date-only").localDate(TODAY).venue("V").build();
+            events(dateOnly);
+            when(hintService.buildHints(any(), any())).thenReturn(List.of());
+
+            CandidateSet any = service.buildCandidates(request().build());
+            CandidateSet evening = service.buildCandidates(request().timePreference(TimePreference.EVENING).build());
+
+            assertThat(any.getCandidates()).singleElement().satisfies(candidate ->
+                    assertThat(candidate.getTimeOfDay()).isNull());
+            assertThat(evening.getCandidates()).isEmpty();
+            assertThat(evening.getStats().getWrongTimeOfDay()).isEqualTo(1);
         }
 
         @Test
@@ -157,7 +194,7 @@ class CandidateServiceImplTest {
             // 16:00 UTC = 11:00 in New York
             OffsetDateTime utc = at(TODAY, "11:00").withOffsetSameInstant(ZoneOffset.UTC);
             Event utcStart = event("u", "B", utc, "W").build();
-            events(request, utcStart);
+            events(utcStart);
             when(hintService.buildHints(any(), any())).thenReturn(List.of());
 
             CandidateSet result = service.buildCandidates(request);
@@ -170,8 +207,7 @@ class CandidateServiceImplTest {
         @DisplayName("ordered by preScore desc, then start, then title")
         void ordering() {
             ValidatedPlanRequest request = request().endDate(TODAY.plusDays(2)).build();
-            events(request,
-                    event("late-day", "Zed", at(TODAY.plusDays(2), "19:00"), "V1").build(),
+            events(event("late-day", "Zed", at(TODAY.plusDays(2), "19:00"), "V1").build(),
                     event("b-title", "beta", at(TODAY, "20:00"), "V2").build(),
                     event("a-title", "Alpha", at(TODAY, "20:00"), "V3").build(),
                     event("earlier", "Omega", at(TODAY, "18:00"), "V4").build(),
@@ -190,8 +226,7 @@ class CandidateServiceImplTest {
         @DisplayName("keeps at most 3 events per venue per day, the best ones")
         void venueCap() {
             ValidatedPlanRequest request = request().endDate(TODAY.plusDays(1)).build();
-            events(request,
-                    event("h1", "A", at(TODAY, "18:00"), "Hall").build(),
+            events(event("h1", "A", at(TODAY, "18:00"), "Hall").build(),
                     event("h2", "B", at(TODAY, "19:00"), "HALL ").build(),
                     event("h3", "C", at(TODAY, "20:00"), "hall").build(),
                     event("h4", "D", at(TODAY, "21:00"), "Hall").build(),
@@ -215,7 +250,7 @@ class CandidateServiceImplTest {
         @DisplayName("caps the result at maxCandidates (30) and adds no hints")
         void maxCandidates() {
             ValidatedPlanRequest request = request().build();
-            events(request, IntStream.range(0, 40)
+            events(IntStream.range(0, 40)
                     .mapToObj(i -> event("e" + i, "Event %02d".formatted(i), at(TODAY, "19:00"), "Venue " + i).build())
                     .toArray(Event[]::new));
 
@@ -232,8 +267,7 @@ class CandidateServiceImplTest {
         @DisplayName("asks for hints with the stats when fewer than 3 candidates remain")
         void hintsWhenFew() {
             ValidatedPlanRequest request = request().build();
-            events(request,
-                    event("a", "A", at(TODAY, "19:00"), "V1").build(),
+            events(event("a", "A", at(TODAY, "19:00"), "V1").build(),
                     event("b", "B", at(TODAY, "19:00"), "V2").build(),
                     event("x", "X", at(TODAY, "19:00"), "V3").status(EventStatus.CANCELLED).build());
             when(hintService.buildHints(any(), any())).thenReturn(List.of("Try different dates."));
@@ -245,9 +279,8 @@ class CandidateServiceImplTest {
         }
     }
 
-    private void events(ValidatedPlanRequest request, Event... events) {
-        when(eventQueryService.findEvents(request.getCity(), request.getStartDate(), request.getEndDate(),
-                request.getInterests())).thenReturn(new ArrayList<>(List.of(events)));
+    private void events(Event... events) {
+        when(eventQueryService.search(any())).thenReturn(new ArrayList<>(List.of(events)));
     }
 
     private static List<String> ids(CandidateSet result) {
@@ -268,15 +301,10 @@ class CandidateServiceImplTest {
     }
 
     private static TestEvent event(String id, String title, OffsetDateTime startAt, String venue) {
-        return new TestEvent(Event.builder()
-                .id(new EventId(EventSource.TICKETMASTER, id))
+        return new TestEvent(TestEvents.event(id)
                 .title(title)
-                .sourceUrl("https://www.ticketmaster.com/" + id)
                 .startAt(startAt)
-                .timezone(NEW_YORK)
-                .status(EventStatus.SCHEDULED)
-                .category("Music")
-                .interests(List.of(Interest.MUSIC))
+                .localDate(startAt.atZoneSameInstant(NEW_YORK).toLocalDate())
                 .venue(venue));
     }
 
@@ -293,8 +321,8 @@ class CandidateServiceImplTest {
             return this;
         }
 
-        TestEvent interests(List<Interest> interests) {
-            builder.interests(interests);
+        TestEvent interests(Interest interest) {
+            TestEvents.interests(builder, interest);
             return this;
         }
 
@@ -309,7 +337,7 @@ class CandidateServiceImplTest {
         }
 
         TestEvent price(String min) {
-            builder.priceMin(new BigDecimal(min)).priceMax(new BigDecimal(min)).currency("USD").priceKnown(true);
+            TestEvents.price(builder, min, min);
             return this;
         }
 

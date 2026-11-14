@@ -45,7 +45,7 @@ class TestErrorController {
     @GetMapping("/upstream")
     void upstream() {
         throw new ServiceValidationException(ErrorCode.UPSTREAM_UNAVAILABLE,
-                kz.astyq.zimran.ticketmaster.util.MessageCode.TICKETMASTER_UNAVAILABLE)
+                kz.astyq.zimran.jsonsource.util.MessageCode.EVENTS_SOURCE_UNAVAILABLE)
                 .withCause(new IOException("connection refused"));
     }
 

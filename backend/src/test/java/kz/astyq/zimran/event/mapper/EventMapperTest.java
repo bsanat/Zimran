@@ -1,10 +1,8 @@
 package kz.astyq.zimran.event.mapper;
 
 import kz.astyq.zimran.event.model.domain.Event;
-import kz.astyq.zimran.event.model.domain.EventId;
-import kz.astyq.zimran.event.model.dto.EventDetailsViewResponse;
+import kz.astyq.zimran.event.model.domain.TestEvents;
 import kz.astyq.zimran.event.model.dto.EventViewResponse;
-import kz.astyq.zimran.event.model.enums.EventSource;
 import kz.astyq.zimran.event.model.enums.EventStatus;
 import kz.astyq.zimran.event.model.enums.Interest;
 import org.junit.jupiter.api.DisplayName;
@@ -13,8 +11,10 @@ import org.junit.jupiter.api.Test;
 import org.mapstruct.factory.Mappers;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.OffsetDateTime;
-import java.time.ZoneId;
+import java.time.ZoneOffset;
+import java.util.EnumSet;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -23,77 +23,98 @@ class EventMapperTest {
 
     private final EventMapper mapper = Mappers.getMapper(EventMapper.class);
 
-    private final Event full = Event.builder()
-            .id(new EventId(EventSource.TICKETMASTER, "vvG1zZ9KbGkM1a"))
+    private final Event full = TestEvents.event("evt-1")
             .title("Jazz at the Village Vanguard")
-            .sourceUrl("https://www.ticketmaster.com/event/vvG1zZ9KbGkM1a")
+            .category(Interest.MUSIC)
+            .interests(EnumSet.of(Interest.MUSIC, Interest.NIGHTLIFE))
             .startAt(OffsetDateTime.parse("2026-11-20T20:00:00-05:00"))
-            .timezone(ZoneId.of("America/New_York"))
-            .status(EventStatus.SCHEDULED)
+            .localDate(LocalDate.of(2026, 11, 20))
+            .dateText("Fri, Nov 20, 8 PM")
+            .status(EventStatus.POSTPONED)
             .description("Two sets nightly.")
-            .category("Music")
-            .interests(List.of(Interest.MUSIC))
             .venue("Village Vanguard")
-            .address("178 7th Ave S, New York, NY, 10014")
-            .city("New York")
+            .address("178 7th Ave S, New York, NY 10014")
             .priceMin(new BigDecimal("35"))
             .priceMax(new BigDecimal("89.5"))
             .currency("USD")
             .priceKnown(true)
-            .imageUrl("https://s1.ticketm.net/dam/a/123/jazz_16_9_1024.jpg")
+            .priceText("$35-$89.50")
+            .imageUrl("https://img.example.com/jazz.jpg")
+            .sourceUrl("https://tickets.example.com/jazz")
+            .major(true)
             .build();
 
     @Nested
-    @DisplayName("toDetailsViewResponse")
-    class ToDetails {
+    @DisplayName("toViewResponse")
+    class ToViewResponse {
 
         @Test
-        @DisplayName("every field, id and timezone as strings")
+        @DisplayName("every contract field; id, source, category, timezone and status as wire strings")
         void allFields() {
-            EventDetailsViewResponse response = mapper.toDetailsViewResponse(full);
+            EventViewResponse response = mapper.toViewResponse(full);
 
-            assertThat(response).usingRecursiveComparison()
-                    .ignoringFields("id", "timezone")
-                    .isEqualTo(full);
-            assertThat(response.getId()).isEqualTo("ticketmaster:vvG1zZ9KbGkM1a");
+            assertThat(response.getId()).isEqualTo("json:evt-1");
+            assertThat(response.getSource()).isEqualTo("json");
+            assertThat(response.getSourceEventId()).isEqualTo("evt-1");
+            assertThat(response.getTitle()).isEqualTo("Jazz at the Village Vanguard");
+            assertThat(response.getCategory()).isEqualTo("music");
+            assertThat(response.getCity()).isEqualTo("New York");
+            assertThat(response.getStartAt()).isEqualTo("2026-11-20T20:00:00-05:00");
+            assertThat(response.getDateText()).isEqualTo("Fri, Nov 20, 8 PM");
             assertThat(response.getTimezone()).isEqualTo("America/New_York");
+            assertThat(response.getVenue()).isEqualTo("Village Vanguard");
+            assertThat(response.getAddress()).isEqualTo("178 7th Ave S, New York, NY 10014");
+            assertThat(response.getDescription()).isEqualTo("Two sets nightly.");
+            assertThat(response.getImageUrl()).isEqualTo("https://img.example.com/jazz.jpg");
+            assertThat(response.getPriceMin()).isEqualByComparingTo("35");
+            assertThat(response.getPriceMax()).isEqualByComparingTo("89.5");
+            assertThat(response.isPriceKnown()).isTrue();
+            assertThat(response.getPriceText()).isEqualTo("$35-$89.50");
+            assertThat(response.getCurrency()).isEqualTo("USD");
+            assertThat(response.getSourceUrl()).isEqualTo("https://tickets.example.com/jazz");
+            assertThat(response.getStatus()).isEqualTo(EventStatus.POSTPONED);
+            assertThat(response.isMajor()).isTrue();
         }
 
         @Test
-        @DisplayName("unknown price stays null, not 0")
-        void unknownPrice() {
-            Event noPrice = Event.builder()
-                    .id(full.getId()).title(full.getTitle()).sourceUrl(full.getSourceUrl())
-                    .startAt(full.getStartAt()).timezone(full.getTimezone()).status(full.getStatus())
-                    .category(full.getCategory()).interests(List.of())
-                    .build();
+        @DisplayName("optional fields stay null; nothing is filled in")
+        void minimal() {
+            EventViewResponse response = mapper.toViewResponse(TestEvents.event("evt-2").build());
 
-            EventDetailsViewResponse response = mapper.toDetailsViewResponse(noPrice);
-
+            assertThat(response.getStartAt()).isNull();
+            assertThat(response.getDateText()).isNull();
+            assertThat(response.getVenue()).isNull();
+            assertThat(response.getAddress()).isNull();
+            assertThat(response.getDescription()).isNull();
+            assertThat(response.getImageUrl()).isNull();
+            assertThat(response.getSourceUrl()).isNull();
             assertThat(response.getPriceMin()).isNull();
             assertThat(response.getPriceMax()).isNull();
             assertThat(response.getCurrency()).isNull();
+            assertThat(response.getPriceText()).isNull();
             assertThat(response.isPriceKnown()).isFalse();
-            assertThat(response.getVenue()).isNull();
+            assertThat(response.isMajor()).isFalse();
+            assertThat(response.getStatus()).isEqualTo(EventStatus.SCHEDULED);
+        }
+
+        @Test
+        @DisplayName("startAt keeps its own offset and whole seconds")
+        void startAtFormat() {
+            Event utc = TestEvents.event("u").startAt(OffsetDateTime.of(2026, 7, 1, 23, 5, 0, 0, ZoneOffset.UTC)).build();
+            Event summer = TestEvents.event("s").startAt(OffsetDateTime.parse("2026-07-01T19:05:00-04:00")).build();
+
+            assertThat(mapper.toViewResponse(utc).getStartAt()).isEqualTo("2026-07-01T23:05:00Z");
+            assertThat(mapper.toViewResponse(summer).getStartAt()).isEqualTo("2026-07-01T19:05:00-04:00");
         }
     }
 
-    @Nested
-    @DisplayName("toViewResponses")
-    class ToViewResponses {
+    @Test
+    @DisplayName("toViewResponses keeps the order")
+    void list() {
+        Event second = TestEvents.event("evt-2").build();
 
-        @Test
-        @DisplayName("list item without description and address; order kept")
-        void list() {
-            List<EventViewResponse> responses = mapper.toViewResponses(List.of(full));
-
-            assertThat(responses).singleElement().satisfies(item -> {
-                assertThat(item.getId()).isEqualTo("ticketmaster:vvG1zZ9KbGkM1a");
-                assertThat(item.getStartAt()).isEqualTo(full.getStartAt());
-                assertThat(item.getPriceMax()).isEqualByComparingTo("89.5");
-                assertThat(item.getImageUrl()).isEqualTo(full.getImageUrl());
-            });
-            assertThat(mapper.toViewResponses(null)).isNull();
-        }
+        assertThat(mapper.toViewResponses(List.of(full, second)))
+                .extracting(EventViewResponse::getId)
+                .containsExactly("json:evt-1", "json:evt-2");
     }
 }

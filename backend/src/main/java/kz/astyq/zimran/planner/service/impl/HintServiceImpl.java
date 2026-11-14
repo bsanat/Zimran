@@ -6,16 +6,16 @@ import kz.astyq.zimran.planner.model.domain.FilterStats;
 import kz.astyq.zimran.planner.model.domain.ValidatedPlanRequest;
 import kz.astyq.zimran.planner.service.HintService;
 import kz.astyq.zimran.planner.util.MessageCode;
-import kz.astyq.zimran.ticketmaster.service.InterestMappingService;
+import kz.astyq.zimran.event.service.EventQueryService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -24,7 +24,7 @@ public class HintServiceImpl implements HintService {
     public static final int MAX_HINTS = 3;
 
     private final MessageService messageService;
-    private final InterestMappingService interestMappingService;
+    private final EventQueryService eventQueryService;
 
     @Override
     public List<String> buildHints(FilterStats stats, ValidatedPlanRequest request) {
@@ -32,9 +32,10 @@ public class HintServiceImpl implements HintService {
         Objects.requireNonNull(request, "request");
         List<String> hints = new ArrayList<>();
 
+        Set<Interest> covered = eventQueryService.coveredInterests(request.getCity());
         request.getInterests().stream()
                 .sorted()
-                .filter(interest -> !interestMappingService.hasCoverage(interest))
+                .filter(interest -> !covered.contains(interest))
                 .map(interest -> messageService.getMessage(MessageCode.HINT_LOW_COVERAGE,
                         displayName(interest), request.getCity().getName()))
                 .forEach(hints::add);
@@ -66,7 +67,7 @@ public class HintServiceImpl implements HintService {
                 .toList();
     }
 
-    private static String displayName(Interest interest) {
-        return interest.name().toLowerCase(Locale.ROOT);
+    private String displayName(Interest interest) {
+        return messageService.getMessage(MessageCode.interestName(interest));
     }
 }

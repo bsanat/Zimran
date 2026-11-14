@@ -27,7 +27,7 @@ class GlobalExceptionHandlerTest {
         void notFound() {
             MvcTestResult result = mvc.get().uri("/api/test/not-found").exchange();
 
-            assertError(result, 404, "NOT_FOUND", "The requested resource was not found");
+            assertError(result, 404, "NOT_FOUND", "The requested resource was not found.");
             assertNoDetails(result);
         }
 
@@ -35,7 +35,7 @@ class GlobalExceptionHandlerTest {
         void keepsDetails() {
             MvcTestResult result = mvc.get().uri("/api/test/validation").exchange();
 
-            assertError(result, 400, "VALIDATION_ERROR", "Request validation failed");
+            assertError(result, 400, "VALIDATION_ERROR", "Please check your preferences and try again.");
             assertThat(result).bodyJson().extractingPath("$.error.details").asMap().containsOnlyKeys("field");
             assertThat(result).bodyJson().extractingPath("$.error.details.field").isEqualTo("city");
         }
@@ -44,7 +44,7 @@ class GlobalExceptionHandlerTest {
         void resolvesMessageArguments() {
             MvcTestResult result = mvc.get().uri("/api/test/method-arg").exchange();
 
-            assertError(result, 409, "CONFLICT", "HTTP method PATCH is not supported for this endpoint");
+            assertError(result, 409, "CONFLICT", "HTTP method PATCH is not supported for this endpoint.");
         }
 
         @Test
@@ -52,7 +52,7 @@ class GlobalExceptionHandlerTest {
             MvcTestResult result = mvc.get().uri("/api/test/upstream").exchange();
 
             assertError(result, 503, "UPSTREAM_UNAVAILABLE",
-                    "The event provider is temporarily unavailable, please try again later");
+                    "The event service is temporarily unavailable. Please try again.");
             assertNoDetails(result);
             assertThat(result.getResponse().getContentAsString()).doesNotContain("connection refused");
         }
@@ -61,7 +61,7 @@ class GlobalExceptionHandlerTest {
         void retryAfterHeader() {
             MvcTestResult result = mvc.get().uri("/api/test/rate-limited").exchange();
 
-            assertError(result, 429, "RATE_LIMITED", "Request validation failed");
+            assertError(result, 429, "RATE_LIMITED", "Please check your preferences and try again.");
             assertThat(result).headers().hasValue(HttpHeaders.RETRY_AFTER, "30");
             assertThat(result).bodyJson().extractingPath("$.error.details.retryAfterSeconds").isEqualTo(30);
         }
@@ -88,7 +88,7 @@ class GlobalExceptionHandlerTest {
                     .content("{\"city\":\"\",\"count\":9}")
                     .exchange();
 
-            assertError(result, 400, "VALIDATION_ERROR", "Request validation failed");
+            assertError(result, 400, "VALIDATION_ERROR", "Please check your preferences and try again.");
             assertThat(result).bodyJson().extractingPath("$.error.details.field").isEqualTo("city");
             assertThat(result).bodyJson().extractingPath("$.error.details.fields").asArray().hasSize(2);
             assertThat(result).bodyJson().extractingPath("$.error.details.fields[0].field").isEqualTo("city");
@@ -104,7 +104,7 @@ class GlobalExceptionHandlerTest {
         void listsParameterErrors() {
             MvcTestResult result = mvc.get().uri("/api/test/param?count=0").exchange();
 
-            assertError(result, 400, "VALIDATION_ERROR", "Request validation failed");
+            assertError(result, 400, "VALIDATION_ERROR", "Please check your preferences and try again.");
             assertThat(result).bodyJson().extractingPath("$.error.details.field").isEqualTo("count");
             assertThat(result).bodyJson().extractingPath("$.error.details.fields[0].field").isEqualTo("count");
             assertThat(result).bodyJson().extractingPath("$.error.details.fields[0].message").asString().isNotBlank();
@@ -121,8 +121,73 @@ class GlobalExceptionHandlerTest {
                     .content("{not json")
                     .exchange();
 
-            assertError(result, 400, "VALIDATION_ERROR", "Request is malformed or has invalid parameters");
+            assertError(result, 400, "VALIDATION_ERROR", "The request is malformed or has invalid parameters.");
             assertNoDetails(result);
+        }
+
+        @Test
+        void wrongTypeNamesTheJsonProperty() {
+            MvcTestResult result = mvc.post().uri("/api/test/body")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content("{\"city\":\"New York\",\"count\":\"many\"}")
+                    .exchange();
+
+            assertError(result, 400, "VALIDATION_ERROR", "The request is malformed or has invalid parameters.");
+            assertThat(result).bodyJson().extractingPath("$.error.details.field").isEqualTo("count");
+        }
+
+        @Test
+        void bodyOverTheLimitIs413() {
+            String big = "{\"city\":\"" + "x".repeat(11_000) + "\",\"count\":1}";
+
+            MvcTestResult result = mvc.post().uri("/api/test/body")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(big)
+                    .exchange();
+
+            assertError(result, 413, "PAYLOAD_TOO_LARGE", "The request is too large.");
+            assertNoDetails(result);
+        }
+
+        @Test
+        void bodyAtTheLimitIsRead() {
+            String padded = "{\"city\":\"" + "x".repeat(10_000) + "\",\"count\":1}";
+
+            assertThat(mvc.post().uri("/api/test/body").contentType(MediaType.APPLICATION_JSON).content(padded)
+                    .exchange()).hasStatusOk();
+        }
+    }
+
+    @Nested
+    class Localization {
+
+        @Test
+        void outlyLangCookieWins() {
+            MvcTestResult result = mvc.get().uri("/api/test/not-found")
+                    .cookie(new jakarta.servlet.http.Cookie("outly-lang", "ru"))
+                    .header(HttpHeaders.ACCEPT_LANGUAGE, "kk")
+                    .exchange();
+
+            assertError(result, 404, "NOT_FOUND", "\u0417\u0430\u043f\u0440\u043e\u0448\u0435\u043d\u043d\u044b\u0439 \u0440\u0435\u0441\u0443\u0440\u0441 \u043d\u0435 \u043d\u0430\u0439\u0434\u0435\u043d.");
+        }
+
+        @Test
+        void acceptLanguageWhenNoCookie() {
+            MvcTestResult result = mvc.get().uri("/api/test/not-found")
+                    .header(HttpHeaders.ACCEPT_LANGUAGE, "kk-KZ,ru;q=0.5")
+                    .exchange();
+
+            assertError(result, 404, "NOT_FOUND", "\u0421\u04b1\u0440\u0430\u043b\u0493\u0430\u043d \u0440\u0435\u0441\u0443\u0440\u0441 \u0442\u0430\u0431\u044b\u043b\u043c\u0430\u0434\u044b.");
+        }
+
+        @Test
+        void unsupportedLanguageFallsBackToEnglish() {
+            MvcTestResult result = mvc.get().uri("/api/test/not-found")
+                    .cookie(new jakarta.servlet.http.Cookie("outly-lang", "de"))
+                    .header(HttpHeaders.ACCEPT_LANGUAGE, "fr")
+                    .exchange();
+
+            assertError(result, 404, "NOT_FOUND", "The requested resource was not found.");
         }
     }
 
@@ -133,7 +198,7 @@ class GlobalExceptionHandlerTest {
         void namesTheField() {
             MvcTestResult result = mvc.get().uri("/api/test/param?count=abc").exchange();
 
-            assertError(result, 400, "VALIDATION_ERROR", "Request is malformed or has invalid parameters");
+            assertError(result, 400, "VALIDATION_ERROR", "The request is malformed or has invalid parameters.");
             assertThat(result).bodyJson().extractingPath("$.error.details.field").isEqualTo("count");
             assertThat(result).bodyJson().extractingPath("$.error.details.fields[0].message").isEqualTo("Invalid value");
         }
@@ -146,7 +211,7 @@ class GlobalExceptionHandlerTest {
         void namesTheField() {
             MvcTestResult result = mvc.get().uri("/api/test/param").exchange();
 
-            assertError(result, 400, "VALIDATION_ERROR", "Request is malformed or has invalid parameters");
+            assertError(result, 400, "VALIDATION_ERROR", "The request is malformed or has invalid parameters.");
             assertThat(result).bodyJson().extractingPath("$.error.details.field").isEqualTo("count");
         }
     }
@@ -158,7 +223,7 @@ class GlobalExceptionHandlerTest {
         void unknownPathIs404() {
             MvcTestResult result = mvc.get().uri("/api/test/does-not-exist").exchange();
 
-            assertError(result, 404, "NOT_FOUND", "The requested resource was not found");
+            assertError(result, 404, "NOT_FOUND", "The requested resource was not found.");
             assertNoDetails(result);
         }
     }
@@ -170,7 +235,7 @@ class GlobalExceptionHandlerTest {
         void is405WithAllowHeader() {
             MvcTestResult result = mvc.delete().uri("/api/test/boom").exchange();
 
-            assertError(result, 405, "VALIDATION_ERROR", "HTTP method DELETE is not supported for this endpoint");
+            assertError(result, 405, "VALIDATION_ERROR", "HTTP method DELETE is not supported for this endpoint.");
             assertThat(result).headers().containsHeader(HttpHeaders.ALLOW);
             assertNoDetails(result);
         }
@@ -183,7 +248,7 @@ class GlobalExceptionHandlerTest {
         void returnsGenericMessageWithoutInternals() throws Exception {
             MvcTestResult result = mvc.get().uri("/api/test/boom").exchange();
 
-            assertError(result, 500, "INTERNAL_ERROR", "An unexpected error occurred");
+            assertError(result, 500, "INTERNAL_ERROR", "An unexpected error occurred. Please try again.");
             assertNoDetails(result);
             assertThat(result.getResponse().getContentAsString())
                     .doesNotContain("secret internal detail")
@@ -198,7 +263,7 @@ class GlobalExceptionHandlerTest {
                     .content("hello")
                     .exchange();
 
-            assertError(result, 415, "VALIDATION_ERROR", "Request is malformed or has invalid parameters");
+            assertError(result, 415, "VALIDATION_ERROR", "The request is malformed or has invalid parameters.");
         }
     }
 

@@ -7,7 +7,7 @@ import kz.astyq.zimran.planner.model.domain.FilterStats;
 import kz.astyq.zimran.planner.model.domain.ValidatedPlanRequest;
 import kz.astyq.zimran.planner.model.enums.TimePreference;
 import kz.astyq.zimran.planner.util.MessageCode;
-import kz.astyq.zimran.ticketmaster.service.InterestMappingService;
+import kz.astyq.zimran.event.service.EventQueryService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -40,7 +40,7 @@ class HintServiceImplTest {
     @Mock
     private MessageService messageService;
     @Mock
-    private InterestMappingService interestMappingService;
+    private EventQueryService eventQueryService;
 
     @InjectMocks
     private HintServiceImpl service;
@@ -48,7 +48,7 @@ class HintServiceImplTest {
     @BeforeEach
     void setUp() {
         lenient().when(messageService.getMessage(anyString())).thenAnswer(inv -> "msg:" + inv.getArgument(0));
-        lenient().when(interestMappingService.hasCoverage(any())).thenReturn(true);
+        lenient().when(eventQueryService.coveredInterests(any())).thenReturn(EnumSet.allOf(Interest.class));
     }
 
     @Nested
@@ -87,10 +87,10 @@ class HintServiceImplTest {
         }
 
         @Test
-        @DisplayName("each requested interest without coverage gets a low-coverage hint first")
+        @DisplayName("each requested interest without events in the city gets a low-coverage hint first")
         void lowCoverage() {
-            when(interestMappingService.hasCoverage(Interest.FOOD)).thenReturn(false);
-            when(messageService.getMessage(MessageCode.HINT_LOW_COVERAGE, "food", "New York"))
+            when(eventQueryService.coveredInterests(NYC)).thenReturn(EnumSet.complementOf(EnumSet.of(Interest.FOOD)));
+            when(messageService.getMessage(MessageCode.HINT_LOW_COVERAGE, "msg:interest_food", "New York"))
                     .thenReturn("We currently have few food events in New York.");
 
             List<String> hints = service.buildHints(stats().overBudget(1).build(),
@@ -104,14 +104,14 @@ class HintServiceImplTest {
         @Test
         @DisplayName("low-coverage hints count towards the limit of 3")
         void limitIncludesLowCoverage() {
-            when(interestMappingService.hasCoverage(any())).thenReturn(false);
+            when(eventQueryService.coveredInterests(any())).thenReturn(EnumSet.noneOf(Interest.class));
             lenient().when(messageService.getMessage(anyString(), any(), any()))
                     .thenAnswer(inv -> "low:" + inv.getArgument(1));
 
             List<String> hints = service.buildHints(stats().overBudget(9).build(),
                     request(EnumSet.of(Interest.MUSIC, Interest.FOOD, Interest.GAMING, Interest.ART)));
 
-            assertThat(hints).containsExactly("low:music", "low:art", "low:food");
+            assertThat(hints).containsExactly("low:msg:interest_music", "low:msg:interest_food", "low:msg:interest_art");
         }
 
         @Test

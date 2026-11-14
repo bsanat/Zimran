@@ -6,7 +6,9 @@ import kz.astyq.zimran.core.exception.dto.ErrorResponse;
 import kz.astyq.zimran.core.i18n.MessageService;
 import kz.astyq.zimran.core.util.ErrorCode;
 import kz.astyq.zimran.core.util.MessageCode;
+import kz.astyq.zimran.core.web.RequestBodyTooLargeException;
 import kz.astyq.zimran.core.web.RequestIdFilter;
+import tools.jackson.core.JacksonException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.MethodParameter;
@@ -100,7 +102,12 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleNotReadable(HttpMessageNotReadableException e) {
         // The parser message may echo request content; keep it in debug logs only.
         log.debug("Unreadable request body: {}", e.getMessage());
-        return malformed(Map.of());
+        if (causedBy(e, RequestBodyTooLargeException.class)) {
+            ErrorCode code = ErrorCode.PAYLOAD_TOO_LARGE;
+            return build(code.getStatus(), code, message(MessageCode.PAYLOAD_TOO_LARGE), Map.of(), new HttpHeaders());
+        }
+        String field = jsonField(e);
+        return malformed(field != null ? singleField(field) : Map.of());
     }
 
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
@@ -131,6 +138,11 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleUnexpected(Exception e) {
+        // The body limit can surface as a raw IOException when it is hit before a converter wraps it.
+        if (causedBy(e, RequestBodyTooLargeException.class)) {
+            ErrorCode code = ErrorCode.PAYLOAD_TOO_LARGE;
+            return build(code.getStatus(), code, message(MessageCode.PAYLOAD_TOO_LARGE), Map.of(), new HttpHeaders());
+        }
         // Other Spring MVC client errors (415, 406, ...) keep their 4xx status instead of becoming 500.
         if (e instanceof org.springframework.web.ErrorResponse springError
                 && springError.getStatusCode().is4xxClientError()) {
@@ -220,6 +232,35 @@ public class GlobalExceptionHandler {
         }
         String name = parameter.getParameterName();
         return name != null ? name : "arg" + parameter.getParameterIndex();
+    }
+
+    private static boolean causedBy(Throwable error, Class<? extends Throwable> type) {
+        for (Throwable current = error; current != null; current = current.getCause()) {
+            if (type.isInstance(current)) {
+                return true;
+            }
+            if (current.getCause() == current) {
+                return false;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Top-level JSON property a body parse error happened in (e.g. {@code interests} for an unknown interest at
+     * {@code interests[0]}), or null when Jackson did not record a path.
+     */
+    private static String jsonField(Throwable error) {
+        for (Throwable current = error; current != null && current.getCause() != current; current = current.getCause()) {
+            if (current instanceof JacksonException jackson) {
+                return jackson.getPath().stream()
+                        .map(JacksonException.Reference::getPropertyName)
+                        .filter(StringUtils::hasText)
+                        .findFirst()
+                        .orElse(null);
+            }
+        }
+        return null;
     }
 
     private static String firstText(String a, String b) {

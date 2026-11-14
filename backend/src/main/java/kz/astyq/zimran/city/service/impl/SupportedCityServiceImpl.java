@@ -47,6 +47,37 @@ public class SupportedCityServiceImpl implements SupportedCityService {
     }
 
     @Override
+    public Optional<SupportedCity> findByName(String name, String state) {
+        if (!StringUtils.hasText(state)) {
+            return findByName(name);
+        }
+        if (!StringUtils.hasText(name)) {
+            return Optional.empty();
+        }
+        String wantedName = name.trim().toLowerCase(Locale.ROOT);
+        String wantedState = state.trim();
+        return getAll().stream()
+                .filter(city -> city.getName().toLowerCase(Locale.ROOT).equals(wantedName))
+                .filter(city -> city.getStateCode() != null && city.getStateCode().trim().equalsIgnoreCase(wantedState))
+                .findFirst();
+    }
+
+    @Override
+    public SupportedCity getByName(String name, String state) {
+        if (!StringUtils.hasText(state)) {
+            return getByName(name);
+        }
+        Optional<SupportedCity> byNameAndState = findByName(name, state)
+                .or(() -> findById(name).filter(city -> state.trim().equalsIgnoreCase(city.getStateCode())));
+        if (byNameAndState.isPresent()) {
+            return byNameAndState.get();
+        }
+        getByName(name); // unknown city: CITY_NOT_SUPPORTED
+        throw new ServiceValidationException(ErrorCode.VALIDATION_ERROR, MessageCode.STATE_NOT_SUPPORTED)
+                .withDetail("field", "state");
+    }
+
+    @Override
     public SupportedCity getByName(String name) {
         return findByName(name)
                 .or(() -> findById(name))

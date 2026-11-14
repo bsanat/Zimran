@@ -22,14 +22,13 @@ class EventIdTest {
         @Test
         @DisplayName("source:id, split at the first colon")
         void valid() {
-            assertThat(EventId.parse("ticketmaster:vvG1zZ9KbGkM1a"))
-                    .isEqualTo(new EventId(EventSource.TICKETMASTER, "vvG1zZ9KbGkM1a"));
-            assertThat(EventId.parse("ticketmaster:a:b").getSourceId()).isEqualTo("a:b");
+            assertThat(EventId.parse("json:evt-123")).isEqualTo(new EventId(EventSource.JSON, "evt-123"));
+            assertThat(EventId.parse("json:a:b").getSourceId()).isEqualTo("a:b");
         }
 
         @ParameterizedTest
         @NullAndEmptySource
-        @ValueSource(strings = {"eventbrite:1", "Ticketmaster:1", "ticketmaster", "ticketmaster:", "ticketmaster:  ", ":1"})
+        @ValueSource(strings = {"ticketmaster:1", "JSON:1", "json", "json:", "json:  ", ":1"})
         @DisplayName("unknown source or malformed: NOT_FOUND")
         void invalid(String value) {
             assertThatThrownBy(() -> EventId.parse(value))
@@ -45,8 +44,8 @@ class EventIdTest {
         @Test
         @DisplayName("inverse of parse")
         void roundTrip() {
-            EventId id = new EventId(EventSource.TICKETMASTER, "Z7r9jZ1A7");
-            assertThat(id.asString()).isEqualTo("ticketmaster:Z7r9jZ1A7");
+            EventId id = new EventId(EventSource.JSON, "Z7r9jZ1A7");
+            assertThat(id.asString()).isEqualTo("json:Z7r9jZ1A7");
             assertThat(EventId.parse(id.asString())).isEqualTo(id);
         }
     }

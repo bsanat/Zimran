@@ -1,9 +1,7 @@
 package kz.astyq.zimran.event.util;
 
 import kz.astyq.zimran.event.model.domain.Event;
-import kz.astyq.zimran.event.model.domain.EventId;
-import kz.astyq.zimran.event.model.enums.EventSource;
-import kz.astyq.zimran.event.model.enums.EventStatus;
+import kz.astyq.zimran.event.model.domain.TestEvents;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -98,6 +96,32 @@ class EventDeduplicatorTest {
     }
 
     @Nested
+    @DisplayName("dedupe: events without a start time")
+    class WithoutTime {
+
+        @Test
+        @DisplayName("same title, venue and day without time: one kept")
+        void sameDay() {
+            Event first = TestEvents.event("a").title("Book Fair").venue("Hall").localDate(EIGHT_PM.toLocalDate()).build();
+            Event second = TestEvents.event("b").title("book fair").venue("hall").localDate(EIGHT_PM.toLocalDate()).build();
+
+            assertThat(EventDeduplicator.dedupe(List.of(first, second))).containsExactly(first);
+        }
+
+        @Test
+        @DisplayName("a dated and an undated listing are different; undated ones match only by the same date text")
+        void undated() {
+            Event dated = TestEvents.event("a").title("Book Fair").localDate(EIGHT_PM.toLocalDate()).build();
+            Event undated = TestEvents.event("b").title("Book Fair").dateText("Every Sunday").build();
+            Event sameText = TestEvents.event("c").title("Book Fair").dateText("every  sunday").build();
+            Event otherText = TestEvents.event("d").title("Book Fair").dateText("Mondays").build();
+
+            assertThat(EventDeduplicator.dedupe(List.of(dated, undated, sameText, otherText)))
+                    .containsExactly(dated, undated, otherText);
+        }
+    }
+
+    @Nested
     @DisplayName("contentKey")
     class ContentKey {
 
@@ -113,15 +137,9 @@ class EventDeduplicatorTest {
     }
 
     private static Event event(String id, String title, String venue, OffsetDateTime startAt, boolean priceKnown) {
-        return Event.builder()
-                .id(new EventId(EventSource.TICKETMASTER, id))
+        return TestEvents.event(id)
                 .title(title)
-                .sourceUrl("https://www.ticketmaster.com/event/" + id)
                 .startAt(startAt)
-                .timezone(ZoneId.of("America/New_York"))
-                .status(EventStatus.SCHEDULED)
-                .category("Music")
-                .interests(List.of())
                 .venue(venue)
                 .priceKnown(priceKnown)
                 .priceMin(priceKnown ? new BigDecimal("20") : null)
