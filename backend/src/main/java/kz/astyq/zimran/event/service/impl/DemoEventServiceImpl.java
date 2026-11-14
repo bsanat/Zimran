@@ -2,6 +2,7 @@ package kz.astyq.zimran.event.service.impl;
 
 import kz.astyq.zimran.city.model.domain.SupportedCity;
 import kz.astyq.zimran.city.service.SupportedCityService;
+import kz.astyq.zimran.event.model.domain.DemoEventDraft;
 import kz.astyq.zimran.event.model.domain.DemoEventSeed;
 import kz.astyq.zimran.event.model.domain.Event;
 import kz.astyq.zimran.event.model.domain.EventId;
@@ -23,6 +24,7 @@ import java.time.Clock;
 import java.time.LocalDate;
 import java.util.EnumSet;
 import java.util.List;
+import java.util.UUID;
 
 /**
  * Sample events from {@value #RESOURCE}: fictional titles and venues, no source URL or image, in the pilot city.
@@ -32,6 +34,8 @@ import java.util.List;
 public class DemoEventServiceImpl implements DemoEventService {
 
     static final String RESOURCE = "demo/demo-events.json";
+    static final String SAMPLE_ID_PREFIX = "sample-";
+    static final String SAMPLE_CURRENCY = "USD";
 
     private final JsonMapper jsonMapper;
     private final SupportedCityService supportedCityService;
@@ -50,6 +54,32 @@ public class DemoEventServiceImpl implements DemoEventService {
         List<Event> events = sampleEvents();
         eventIngestionService.upsert(events);
         return events.size();
+    }
+
+    @Override
+    public Event addSample(DemoEventDraft draft) {
+        SupportedCity city = draft.getCity();
+        Interest primary = draft.getCategorySlug().interests().iterator().next();
+        boolean priceKnown = draft.getPriceMax() != null;
+        Event event = Event.builder()
+                .id(new EventId(EventSource.DEMO, SAMPLE_ID_PREFIX + UUID.randomUUID()))
+                .title(draft.getTitle())
+                .category(primary)
+                .interests(EnumSet.of(primary))
+                .city(city.getName())
+                .state(city.getStateCode())
+                .timezone(city.getZone())
+                .status(EventStatus.SCHEDULED)
+                .startAt(draft.getStartAt())
+                .localDate(draft.getStartAt().toLocalDate())
+                .priceMin(draft.getPriceMax())
+                .priceMax(draft.getPriceMax())
+                .currency(priceKnown ? SAMPLE_CURRENCY : null)
+                .priceKnown(priceKnown)
+                .demo(true)
+                .build();
+        eventIngestionService.upsert(List.of(event));
+        return event;
     }
 
     private List<DemoEventSeed> readSeeds() {

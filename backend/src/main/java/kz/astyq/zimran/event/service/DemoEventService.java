@@ -1,5 +1,6 @@
 package kz.astyq.zimran.event.service;
 
+import kz.astyq.zimran.event.model.domain.DemoEventDraft;
 import kz.astyq.zimran.event.model.domain.Event;
 
 import java.util.List;
@@ -20,4 +21,13 @@ public interface DemoEventService {
      * @return how many samples were stored
      */
     int seed();
+
+    /**
+     * Adds one new sample event (provider {@code demo}, {@code isDemo}) through ingestion, so it is new to the
+     * catalog for real (its {@code firstSeenAt} is now). It does not trigger alert matching: demo events are matched
+     * only by the demo alert check.
+     *
+     * @return the stored sample
+     */
+    Event addSample(DemoEventDraft draft);
 }
