@@ -26,6 +26,12 @@ function isEvent(value: unknown): value is EventData {
   return strings.every((key) => typeof value[key] === "string" && (value[key] as string).length > 0) &&
     nullableStrings.every((key) => value[key] === null || typeof value[key] === "string") &&
     ["dateText", "priceText"].every((key) => value[key] === undefined || value[key] === null || typeof value[key] === "string") &&
+    ["state", "sourceName", "lastVerifiedAt", "startDate", "endDate"].every((key) => value[key] === undefined || value[key] === null || typeof value[key] === "string") &&
+    ["imageIsIllustration", "isRecurring"].every((key) => value[key] === undefined || typeof value[key] === "boolean") &&
+    (value.recurrenceDays === undefined || (Array.isArray(value.recurrenceDays) && value.recurrenceDays.every(day => Number.isInteger(day) && day >= 0 && day <= 6))) &&
+    (value.recurrenceMonths === undefined || (Array.isArray(value.recurrenceMonths) && value.recurrenceMonths.every(month => Number.isInteger(month) && month >= 1 && month <= 12))) &&
+    ["occurrenceDates", "excludedDates"].every(key => value[key] === undefined || (Array.isArray(value[key]) && value[key].every(date => typeof date === "string"))) &&
+    (value.availableDateRanges === undefined || (Array.isArray(value.availableDateRanges) && value.availableDateRanges.every(range => Array.isArray(range) && range.length === 2 && range.every(date => typeof date === "string")))) &&
     ["priceMin", "priceMax"].every((key) => value[key] === null ||
       (typeof value[key] === "number" && Number.isFinite(value[key]) && (value[key] as number) >= 0)) &&
     typeof value.priceKnown === "boolean" &&
@@ -88,15 +94,17 @@ async function request(path: string, init: RequestInit, signal?: AbortSignal): P
 }
 
 export async function getEvents(
-  filters: { city: string; state?: string; date?: string; category?: string; page?: number; major?: boolean; keyword?: string },
+  filters: { city?: string; state?: string; date?: string; category?: string; page?: number; major?: boolean; keyword?: string; source?: "catalog" | "live" },
   signal?: AbortSignal,
 ): Promise<EventsResponse> {
-  const query = new URLSearchParams({ city: filters.city, page: String(filters.page ?? 1) });
+  const query = new URLSearchParams({ page: String(filters.page ?? 1) });
+  if (filters.city) query.set("city", filters.city);
   if (filters.date) query.set("date", filters.date);
   if (filters.category) query.set("category", filters.category);
   if (filters.state) query.set("state", filters.state);
   if (filters.major) query.set("major", "true");
   if (filters.keyword) query.set("keyword", filters.keyword);
+  if (filters.source) query.set("source", filters.source);
   const body = await request(`/events?${query}`, {}, signal);
   if (!record(body) || !Array.isArray(body.events) || !body.events.every(isEvent) ||
       !record(body.pagination) || !Number.isInteger(body.pagination.page) || (body.pagination.page as number) < 1 ||

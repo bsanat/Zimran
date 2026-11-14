@@ -22,14 +22,14 @@ const raw = {
   title: "Source concert", date: "Nov 21", time: "7:00 PM", address: ["Source venue", "New York, NY"],
   thumbnail: "https://example.org/event.jpg", event_token: "fixture-event-token",
 };
-const request = (query: string) => new Request(`http://localhost/api/events?city=New+York&${query}`);
+const request = (query: string) => new Request(`http://localhost/api/events?source=live&city=New+York&${query}`);
 const plan = (value: unknown) => planRoute(new Request("http://localhost/api/plan", { method: "POST", body: JSON.stringify(value) }));
 
 test("health and invalid filters never spend provider requests", async t => {
   t.mock.method(globalThis, "fetch", async () => { throw new Error("Unexpected provider request"); });
   assert.deepEqual(await (await healthRoute()).json(), { ok: true });
   for (const query of ["city=Chicago", "category=unknown", "date=2099-02-30", "date=2099-13-01", "page=0", "page=1.5", "keyword=" + "x".repeat(101), "major=maybe", "state=NJ"]) {
-    const response = await eventsRoute(new Request(`http://localhost/api/events?${query}`));
+    const response = await eventsRoute(new Request(`http://localhost/api/events?source=live&${query}`));
     assert.equal(response.status, 400, query);
     assert.equal((await response.json()).error.code, "VALIDATION_ERROR");
   }
