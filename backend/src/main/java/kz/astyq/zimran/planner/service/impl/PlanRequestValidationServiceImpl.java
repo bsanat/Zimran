@@ -28,9 +28,6 @@ import java.util.regex.Pattern;
 @RequiredArgsConstructor
 public class PlanRequestValidationServiceImpl implements PlanRequestValidationService {
 
-    static final int MAX_START_DAYS_AHEAD = 90;
-    static final BigDecimal MAX_BUDGET = new BigDecimal("10000");
-    static final int MAX_BUDGET_SCALE = 2;
     static final int MAX_NOTES_LENGTH = 500;
 
     /** Control characters other than the newline. */
@@ -45,7 +42,7 @@ public class PlanRequestValidationServiceImpl implements PlanRequestValidationSe
     @Override
     public ValidatedPlanRequest validate(PlanCreateRequest request) {
         Objects.requireNonNull(request, "request");
-        SupportedCity city = supportedCityService.getByName(request.getCity());
+        SupportedCity city = supportedCityService.getByName(request.getCity(), request.getState());
         Set<Interest> interests = interests(request);
 
         LocalDate today = LocalDate.now(clock.withZone(city.getZone()));
@@ -81,9 +78,6 @@ public class PlanRequestValidationServiceImpl implements PlanRequestValidationSe
         if (startDate.isBefore(today)) {
             throw invalid(MessageCode.START_DATE_IN_PAST, "startDate");
         }
-        if (startDate.isAfter(today.plusDays(MAX_START_DAYS_AHEAD))) {
-            throw invalid(MessageCode.START_DATE_TOO_FAR, "startDate", MAX_START_DAYS_AHEAD);
-        }
         return startDate;
     }
 
@@ -105,9 +99,7 @@ public class PlanRequestValidationServiceImpl implements PlanRequestValidationSe
         if (budgetMax == null) {
             return null;
         }
-        if (budgetMax.signum() < 0
-                || budgetMax.compareTo(MAX_BUDGET) > 0
-                || budgetMax.stripTrailingZeros().scale() > MAX_BUDGET_SCALE) {
+        if (budgetMax.signum() < 0) {
             throw invalid(MessageCode.BUDGET_INVALID, "budgetMax");
         }
         return budgetMax;

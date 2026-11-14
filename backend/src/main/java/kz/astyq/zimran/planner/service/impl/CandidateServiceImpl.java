@@ -2,9 +2,11 @@ package kz.astyq.zimran.planner.service.impl;
 
 import kz.astyq.zimran.core.configuration.PlannerProperties;
 import kz.astyq.zimran.event.model.domain.Event;
+import kz.astyq.zimran.event.model.domain.EventCriteria;
 import kz.astyq.zimran.event.model.enums.EventStatus;
 import kz.astyq.zimran.event.model.enums.Interest;
 import kz.astyq.zimran.event.service.EventQueryService;
+import kz.astyq.zimran.event.util.EventOrdering;
 import kz.astyq.zimran.planner.model.domain.Candidate;
 import kz.astyq.zimran.planner.model.domain.CandidateSet;
 import kz.astyq.zimran.planner.model.domain.FilterStats;
@@ -23,7 +25,6 @@ import org.springframework.util.StringUtils;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.LocalDate;
-import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -44,7 +45,7 @@ public class CandidateServiceImpl implements CandidateService {
 
     private static final Comparator<Candidate> BEST_FIRST = Comparator
             .comparingInt(Candidate::getPreScore).reversed()
-            .thenComparing(c -> c.getEvent().getStartAt().toInstant())
+            .thenComparing(c -> EventOrdering.sortInstant(c.getEvent()), Comparator.nullsLast(Comparator.naturalOrder()))
             .thenComparing(c -> c.getEvent().getTitle(), String.CASE_INSENSITIVE_ORDER)
             .thenComparing(c -> c.getEvent().getTitle())
             .thenComparing(c -> c.getEvent().getId().asString());
@@ -57,8 +58,13 @@ public class CandidateServiceImpl implements CandidateService {
     @Override
     public CandidateSet buildCandidates(ValidatedPlanRequest request) {
         Objects.requireNonNull(request, "request");
-        List<Event> events = eventQueryService.findEvents(request.getCity(), request.getStartDate(),
-                request.getEndDate(), request.getInterests());
+        List<Event> events = eventQueryService.search(EventCriteria.builder()
+                .city(request.getCity())
+                .fromDate(request.getStartDate())
+                .toDate(request.getEndDate())
+                .includeUndated(false)
+                .interests(request.getInterests())
+                .build());
 
         Instant now = clock.instant();
         StatsCounter counter = new StatsCounter();
@@ -91,12 +97,13 @@ public class CandidateServiceImpl implements CandidateService {
             counter.notScheduled++;
             return null;
         }
-        if (event.getStartAt().toInstant().isBefore(now)) {
+        // A multi-day event whose first day has passed may still be on; its schedule decides below.
+        if (event.getSchedule() == null && event.getStartAt() != null && event.getStartAt().toInstant().isBefore(now)) {
             counter.past++;
             return null;
         }
         LocalDate eventDate = cityDate(event, request);
-        if (eventDate.isBefore(request.getStartDate()) || eventDate.isAfter(request.getEndDate())) {
+        if (eventDate == null) {
             counter.outsideRange++;
             return null;
         }
@@ -105,19 +112,18 @@ public class CandidateServiceImpl implements CandidateService {
             counter.noInterestMatch++;
             return null;
         }
-        OffsetDateTime localStart = event.getStartAt().atZoneSameInstant(event.getTimezone()).toOffsetDateTime();
-        TimeOfDay timeOfDay = TimeOfDayResolver.resolve(localStart);
-        boolean timeMatches = TimeOfDayResolver.matches(request.getTimePreference(), timeOfDay);
-        if (!timeMatches) {
+        TimeOfDay timeOfDay = event.getStartAt() == null ? null : TimeOfDayResolver.resolve(
+                event.getStartAt().atZoneSameInstant(event.getTimezone()).toOffsetDateTime());
+        if (!TimeOfDayResolver.matches(request.getTimePreference(), timeOfDay)) {
             counter.wrongTimeOfDay++;
             return null;
         }
-        BudgetFit budgetFit = BudgetEvaluator.evaluate(event, request.getBudgetMax(),
-                plannerProperties.isIncludeUnknownPrice());
+        BudgetFit budgetFit = BudgetEvaluator.evaluate(event, request.getBudgetMax());
         if (budgetFit == BudgetFit.OVER) {
             counter.overBudget++;
             return null;
         }
+        boolean timeMatches = timeOfDay != null; // passed the preference filter above, so a known time fits
         int preScore = PreScoreCalculator.score(event, matched, request.getInterests(), budgetFit, timeMatches,
                 eventDate, request.getStartDate(), request.getEndDate());
         return Candidate.builder()
@@ -156,9 +162,12 @@ public class CandidateServiceImpl implements CandidateService {
         return kept;
     }
 
-    /** The event's day in the city's timezone, the zone request dates are interpreted in. */
+    /**
+     * The event's first day within the requested dates, in the city's timezone (the zone request dates are
+     * interpreted in); null when it is on none of them or its date is unknown.
+     */
     private static LocalDate cityDate(Event event, ValidatedPlanRequest request) {
-        return event.getStartAt().atZoneSameInstant(request.getCity().getZone()).toLocalDate();
+        return event.firstDayBetween(request.getStartDate(), request.getEndDate(), request.getCity().getZone());
     }
 
     private static final class StatsCounter {

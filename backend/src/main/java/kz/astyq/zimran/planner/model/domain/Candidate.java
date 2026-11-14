@@ -23,7 +23,7 @@ public class Candidate {
     Set<Interest> matchedInterests;
     @NonNull
     BudgetFit budgetFit;
-    @NonNull
+    /** Null when the event has no known start time (only possible with time preference ANY). */
     TimeOfDay timeOfDay;
     int preScore;
 }

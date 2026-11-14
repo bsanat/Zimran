@@ -32,6 +32,8 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.Assertions.catchThrowable;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.when;
 
@@ -64,7 +66,7 @@ class PlanRequestValidationServiceImplTest {
 
         @BeforeEach
         void city() {
-            lenient().when(supportedCityService.getByName("New York")).thenReturn(NYC);
+            lenient().when(supportedCityService.getByName(eq("New York"), any())).thenReturn(NYC);
         }
 
         @Test
@@ -102,7 +104,7 @@ class PlanRequestValidationServiceImplTest {
         void unsupportedCity() {
             ServiceValidationException error = new ServiceValidationException(ErrorCode.VALIDATION_ERROR,
                     "city_not_supported").withDetail("field", "city");
-            when(supportedCityService.getByName("Paris")).thenThrow(error);
+            when(supportedCityService.getByName("Paris", null)).thenThrow(error);
 
             assertThatThrownBy(() -> service.validate(valid().city("Paris").build())).isSameAs(error);
         }
@@ -150,13 +152,10 @@ class PlanRequestValidationServiceImplTest {
         }
 
         @Test
-        @DisplayName("startDate may be up to 90 days ahead")
-        void startDateTooFar() {
-            assertThat(service.validate(valid().startDate(TODAY.plusDays(90)).build()).getStartDate())
-                    .isEqualTo(TODAY.plusDays(90));
-            ServiceValidationException error = assertInvalid(valid().startDate(TODAY.plusDays(91)),
-                    MessageCode.START_DATE_TOO_FAR, "startDate");
-            assertThat(error.getArguments()).containsExactly(90);
+        @DisplayName("startDate has no upper limit (the frontend lets guests pick any future day)")
+        void startDateFarAhead() {
+            assertThat(service.validate(valid().startDate(TODAY.plusDays(400)).build()).getStartDate())
+                    .isEqualTo(TODAY.plusDays(400));
         }
 
         @Test
@@ -187,16 +186,16 @@ class PlanRequestValidationServiceImplTest {
         }
 
         @ParameterizedTest
-        @ValueSource(strings = {"0", "0.00", "25", "25.5", "25.50", "10000", "10000.00", "25.500"})
-        @DisplayName("budgetMax from 0 to 10000 with at most 2 decimals is accepted")
+        @ValueSource(strings = {"0", "0.00", "25", "25.5", "25.555", "10000", "20000.001"})
+        @DisplayName("any budgetMax >= 0 is accepted (0 = free only)")
         void budgetValid(String budget) {
             assertThat(service.validate(valid().budgetMax(new BigDecimal(budget)).build()).getBudgetMax())
                     .isEqualByComparingTo(budget);
         }
 
         @ParameterizedTest
-        @ValueSource(strings = {"-0.01", "-1", "10000.01", "20000", "25.555", "0.001"})
-        @DisplayName("budgetMax out of range or with more than 2 decimals is rejected")
+        @ValueSource(strings = {"-0.01", "-1", "-10000"})
+        @DisplayName("a negative budgetMax is rejected")
         void budgetInvalid(String budget) {
             assertInvalid(valid().budgetMax(new BigDecimal(budget)), MessageCode.BUDGET_INVALID, "budgetMax");
         }

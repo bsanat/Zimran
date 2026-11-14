@@ -24,72 +24,363 @@ application:
 app:
   city:
     default-id: nyc
+    # Every city of the event feed (data/events.json); a city missing here gets no search results.
     supported:
       - id: nyc
         name: New York
         state-code: NY
         country-code: US
         zone: America/New_York
-  cache:
-    search-ttl: ${CACHE_SEARCH_TTL:10m}
-    search-max-size: 500
-    stale-ttl: 6h
-    stale-max-size: 500
-    by-id-ttl: 30m
-    by-id-max-size: 5000
+      - id: anchorage-ak
+        name: Anchorage
+        state-code: AK
+        country-code: US
+        zone: America/Anchorage
+      - id: huntsville-al
+        name: Huntsville
+        state-code: AL
+        country-code: US
+        zone: America/Chicago
+      - id: little-rock-ar
+        name: Little Rock
+        state-code: AR
+        country-code: US
+        zone: America/Chicago
+      - id: phoenix-az
+        name: Phoenix
+        state-code: AZ
+        country-code: US
+        zone: America/Phoenix
+      - id: los-angeles-ca
+        name: Los Angeles
+        state-code: CA
+        country-code: US
+        zone: America/Los_Angeles
+      - id: san-diego-ca
+        name: San Diego
+        state-code: CA
+        country-code: US
+        zone: America/Los_Angeles
+      - id: san-francisco-ca
+        name: San Francisco
+        state-code: CA
+        country-code: US
+        zone: America/Los_Angeles
+      - id: san-jose-ca
+        name: San Jose
+        state-code: CA
+        country-code: US
+        zone: America/Los_Angeles
+      - id: denver-co
+        name: Denver
+        state-code: CO
+        country-code: US
+        zone: America/Denver
+      - id: hartford-ct
+        name: Hartford
+        state-code: CT
+        country-code: US
+        zone: America/New_York
+      - id: washington-dc
+        name: Washington
+        state-code: DC
+        country-code: US
+        zone: America/New_York
+      - id: winterthur-de
+        name: Winterthur
+        state-code: DE
+        country-code: US
+        zone: America/New_York
+      - id: jacksonville-beach-fl
+        name: Jacksonville Beach
+        state-code: FL
+        country-code: US
+        zone: America/New_York
+      - id: miami-fl
+        name: Miami
+        state-code: FL
+        country-code: US
+        zone: America/New_York
+      - id: miami-beach-fl
+        name: Miami Beach
+        state-code: FL
+        country-code: US
+        zone: America/New_York
+      - id: atlanta-ga
+        name: Atlanta
+        state-code: GA
+        country-code: US
+        zone: America/New_York
+      - id: honolulu-hi
+        name: Honolulu
+        state-code: HI
+        country-code: US
+        zone: Pacific/Honolulu
+      - id: des-moines-ia
+        name: Des Moines
+        state-code: IA
+        country-code: US
+        zone: America/Chicago
+      - id: boise-id
+        name: Boise
+        state-code: ID
+        country-code: US
+        zone: America/Boise
+      - id: chicago-il
+        name: Chicago
+        state-code: IL
+        country-code: US
+        zone: America/Chicago
+      - id: indianapolis-in
+        name: Indianapolis
+        state-code: IN
+        country-code: US
+        zone: America/Indiana/Indianapolis
+      - id: olathe-ks
+        name: Olathe
+        state-code: KS
+        country-code: US
+        zone: America/Chicago
+      - id: mammoth-cave-ky
+        name: Mammoth Cave
+        state-code: KY
+        country-code: US
+        zone: America/Chicago
+      - id: new-orleans-la
+        name: New Orleans
+        state-code: LA
+        country-code: US
+        zone: America/Chicago
+      - id: boston-ma
+        name: Boston
+        state-code: MA
+        country-code: US
+        zone: America/New_York
+      - id: baltimore-md
+        name: Baltimore
+        state-code: MD
+        country-code: US
+        zone: America/New_York
+      - id: portland-me
+        name: Portland
+        state-code: ME
+        country-code: US
+        zone: America/New_York
+      - id: detroit-mi
+        name: Detroit
+        state-code: MI
+        country-code: US
+        zone: America/Detroit
+      - id: minneapolis-mn
+        name: Minneapolis
+        state-code: MN
+        country-code: US
+        zone: America/Chicago
+      - id: st-louis-mo
+        name: St. Louis
+        state-code: MO
+        country-code: US
+        zone: America/Chicago
+      - id: jackson-ms
+        name: Jackson
+        state-code: MS
+        country-code: US
+        zone: America/Chicago
+      - id: bozeman-mt
+        name: Bozeman
+        state-code: MT
+        country-code: US
+        zone: America/Denver
+      - id: charlotte-nc
+        name: Charlotte
+        state-code: NC
+        country-code: US
+        zone: America/New_York
+      - id: fargo-nd
+        name: Fargo
+        state-code: ND
+        country-code: US
+        zone: America/Chicago
+      - id: lincoln-ne
+        name: Lincoln
+        state-code: NE
+        country-code: US
+        zone: America/Chicago
+      - id: manchester-nh
+        name: Manchester
+        state-code: NH
+        country-code: US
+        zone: America/New_York
+      - id: camden-nj
+        name: Camden
+        state-code: NJ
+        country-code: US
+        zone: America/New_York
+      - id: albuquerque-nm
+        name: Albuquerque
+        state-code: NM
+        country-code: US
+        zone: America/Denver
+      - id: carlsbad-nm
+        name: Carlsbad
+        state-code: NM
+        country-code: US
+        zone: America/Denver
+      - id: las-vegas-nv
+        name: Las Vegas
+        state-code: NV
+        country-code: US
+        zone: America/Los_Angeles
+      - id: columbus-oh
+        name: Columbus
+        state-code: OH
+        country-code: US
+        zone: America/New_York
+      - id: tulsa-ok
+        name: Tulsa
+        state-code: OK
+        country-code: US
+        zone: America/Chicago
+      - id: portland-or
+        name: Portland
+        state-code: OR
+        country-code: US
+        zone: America/Los_Angeles
+      - id: philadelphia-pa
+        name: Philadelphia
+        state-code: PA
+        country-code: US
+        zone: America/New_York
+      - id: providence-ri
+        name: Providence
+        state-code: RI
+        country-code: US
+        zone: America/New_York
+      - id: gadsden-sc
+        name: Gadsden
+        state-code: SC
+        country-code: US
+        zone: America/New_York
+      - id: sioux-falls-sd
+        name: Sioux Falls
+        state-code: SD
+        country-code: US
+        zone: America/Chicago
+      - id: nashville-tn
+        name: Nashville
+        state-code: TN
+        country-code: US
+        zone: America/Chicago
+      - id: austin-tx
+        name: Austin
+        state-code: TX
+        country-code: US
+        zone: America/Chicago
+      - id: dallas-tx
+        name: Dallas
+        state-code: TX
+        country-code: US
+        zone: America/Chicago
+      - id: houston-tx
+        name: Houston
+        state-code: TX
+        country-code: US
+        zone: America/Chicago
+      - id: salt-lake-city-ut
+        name: Salt Lake City
+        state-code: UT
+        country-code: US
+        zone: America/Denver
+      - id: virginia-beach-va
+        name: Virginia Beach
+        state-code: VA
+        country-code: US
+        zone: America/New_York
+      - id: essex-junction-vt
+        name: Essex Junction
+        state-code: VT
+        country-code: US
+        zone: America/New_York
+      - id: rutland-vt
+        name: Rutland
+        state-code: VT
+        country-code: US
+        zone: America/New_York
+      - id: seattle-wa
+        name: Seattle
+        state-code: WA
+        country-code: US
+        zone: America/Los_Angeles
+      - id: milwaukee-wi
+        name: Milwaukee
+        state-code: WI
+        country-code: US
+        zone: America/Chicago
+      - id: charleston-wv
+        name: Charleston
+        state-code: WV
+        country-code: US
+        zone: America/New_York
+      - id: cheyenne-wy
+        name: Cheyenne
+        state-code: WY
+        country-code: US
+        zone: America/Denver
   cors:
     allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:3000}
-  ticketmaster:
-    base-url: ${TICKETMASTER_BASE_URL:https://app.ticketmaster.com}
-    api-key: ${TICKETMASTER_API_KEY:}
+  web:
+    max-request-body-bytes: 10240
+    rate-limit:
+      enabled: true
+      requests-per-minute: ${PLAN_RATE_LIMIT_PER_MINUTE:30}
+      paths:
+        - /api/plan
+  events-source:
+    # File path or http(s) URL of the JSON event feed. Blank = the catalog answers 503.
+    # Default: backend/data/events.json, relative to the directory the app is started from (backend/).
+    location: ${EVENTS_JSON_SOURCE:data/events.json}
+    refresh-interval: ${EVENTS_JSON_REFRESH:1m}
     connect-timeout: 3s
     read-timeout: 10s
-    page-size: 100
-    max-pages-per-search: 2
-    # Interest -> Ticketmaster classification rules (segment / genre / subGenre; omitted = any).
-    # Initial values: verify the names against GET /discovery/v2/classifications.json before relying
-    # on them. An interest with no rules has no coverage and returns no events (nothing is made up).
-    interest-mapping:
-      music:
-        - segment: Music
-      sports:
-        - segment: Sports
-      theater:
-        - { segment: "Arts & Theatre", genre: Theatre }
-        - { segment: "Arts & Theatre", genre: Musical }
-        - { segment: "Arts & Theatre", genre: Opera }
-        - { segment: "Arts & Theatre", genre: Dance }
-      art:
-        - { segment: "Arts & Theatre", genre: "Fine Art" }
-        - { segment: "Arts & Theatre", genre: Multimedia }
-        - { segment: "Arts & Theatre", genre: Cultural }
-      comedy:
-        - genre: Comedy
-      food:
-        - genre: "Food & Drink"
-      nightlife:
-        - sub-genre: Club
-        - genre: "Dance/Electronic"
-      outdoors:
-        - genre: "Fairs & Festivals"
-        - genre: Outdoor
-      technology:
-        - genre: "Lecture/Seminar"
-      gaming:
-        - genre: Esports
-        - sub-genre: Gaming
+    max-bytes: 52428800
+    # Interest -> source category names (ignoring case). A source category equal to an interest id
+    # (music, sports, ...) needs no entry. Provisional names: revise them against the real feed's categories.
+    # Events whose categories map to no interest are skipped (nothing is guessed).
+    category-mapping:
+      music: [concert, concerts, live music, music festival]
+      sports: [sport, sports event, game]
+      food: ["food & drink", food and drink, "food & drinks", culinary, dining, tasting]
+      art: [arts, "arts & culture", "art & culture", exhibition, museum, gallery, fine art]
+      theater: [theatre, broadway, musical, opera, dance, performing arts]
+      outdoors: [outdoor, outdoor activities, park, parks]
+      nightlife: [club, clubs, party, parties, dj]
+      technology: [tech, "science & technology", science and technology]
+      comedy: [stand-up, standup, stand up comedy, improv]
+      gaming: [games, esports, video games, board games]
+      family: [kids, "kids & family", "family & kids", children]
+      books: [book, literature, reading, author talk, poetry]
+      ai: [artificial intelligence, machine learning]
+      running: [run, marathon, half marathon, 5k, 10k]
+      climate: [environment, sustainability, climate change]
+      fitness: [workout, exercise, training]
+      wellness: [yoga, meditation, "health & wellness", mindfulness]
+      crypto: [blockchain, web3, cryptocurrency]
   openai:
     base-url: ${OPENAI_BASE_URL:https://api.openai.com/v1}
     api-key: ${OPENAI_API_KEY:}
     model: ${OPENAI_MODEL:gpt-5-mini}
+    reasoning-effort: ${OPENAI_REASONING_EFFORT:low}
     connect-timeout: 3s
-    read-timeout: 30s
+    # The whole AI call is capped by total-timeout so POST /api/plan answers within 25 s
+    # (the frontend aborts at 30 s); the rule-based ranking answers after it.
+    read-timeout: 15s
+    total-timeout: 18s
     max-output-tokens: 2000
+    max-requests-per-minute: ${OPENAI_MAX_REQUESTS_PER_MINUTE:30}
   planner:
     max-candidates: 30
     max-recommendations: 5
     max-range-days: 7
-    include-unknown-price: true
 
 logging:
   pattern:

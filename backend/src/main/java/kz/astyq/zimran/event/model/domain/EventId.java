@@ -8,8 +8,8 @@ import lombok.NonNull;
 import lombok.Value;
 
 /**
- * Identity of an event: the provider plus the provider's own id. Public form: {@code <source>:<sourceId>},
- * e.g. {@code ticketmaster:vvG1zZ9KbGkM1a}.
+ * Identity of an event: the source plus the source's own id. Public form: {@code <source>:<sourceEventId>},
+ * e.g. {@code json:evt-123}.
  */
 @Value
 public class EventId {
@@ -29,15 +29,15 @@ public class EventId {
     public static EventId parse(String value) {
         int separator = value != null ? value.indexOf(SEPARATOR) : -1;
         if (separator <= 0 || separator == value.length() - 1) {
-            throw notFound(value);
+            throw notFound();
         }
         String sourceId = value.substring(separator + 1);
         if (sourceId.isBlank()) {
-            throw notFound(value);
+            throw notFound();
         }
         return EventSource.fromCode(value.substring(0, separator))
                 .map(source -> new EventId(source, sourceId))
-                .orElseThrow(() -> notFound(value));
+                .orElseThrow(EventId::notFound);
     }
 
     /**
@@ -47,7 +47,7 @@ public class EventId {
         return source.getCode() + SEPARATOR + sourceId;
     }
 
-    private static ServiceValidationException notFound(String value) {
-        return new ServiceValidationException(ErrorCode.NOT_FOUND, MessageCode.EVENT_NOT_FOUND, value);
+    private static ServiceValidationException notFound() {
+        return new ServiceValidationException(ErrorCode.NOT_FOUND, MessageCode.EVENT_NOT_FOUND);
     }
 }

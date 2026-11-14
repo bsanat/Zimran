@@ -12,15 +12,21 @@ import java.util.List;
 @ConfigurationProperties(prefix = "application")
 public class AppSettings {
 
-    private String defaultLocale;
-    private static final List<String> locales = List.of("ru", "en", "kk");
+    /** Languages with a {@code messages_<lang>.properties} file. */
+    public static final List<String> SUPPORTED_LOCALES = List.of("ru", "en", "kk");
+    private static final String FALLBACK_LOCALE = "en";
 
+    private String defaultLocale = FALLBACK_LOCALE;
+
+    /**
+     * Language of the current request ({@code ru}, {@code en} or {@code kk}), else the default.
+     */
     public String getLocale() {
         String locale = LocaleContextHolder.getLocale().getLanguage();
-        if (locales.contains(locale)) {
+        if (SUPPORTED_LOCALES.contains(locale)) {
             return locale;
         }
-        return defaultLocale;
+        return defaultLocale != null ? defaultLocale : FALLBACK_LOCALE;
     }
 
 }

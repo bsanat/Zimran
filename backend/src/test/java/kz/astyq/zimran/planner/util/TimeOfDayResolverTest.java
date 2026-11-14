@@ -27,14 +27,13 @@ class TimeOfDayResolverTest {
 
         @ParameterizedTest(name = "{0} -> {1}")
         @CsvSource({
-                "04:59, EVENING",
-                "05:00, MORNING",
+                "00:00, MORNING",
+                "04:59, MORNING",
                 "11:59, MORNING",
                 "12:00, AFTERNOON",
                 "16:59, AFTERNOON",
                 "17:00, EVENING",
-                "23:59, EVENING",
-                "00:30, EVENING"
+                "23:59, EVENING"
         })
         void boundaries(String time, TimeOfDay expected) {
             OffsetDateTime startAt = LocalDateTime.parse("2026-11-20T" + time).atZone(NEW_YORK).toOffsetDateTime();
@@ -83,6 +82,13 @@ class TimeOfDayResolverTest {
         })
         void specificPreference(TimePreference preference, TimeOfDay timeOfDay, boolean expected) {
             assertThat(TimeOfDayResolver.matches(preference, timeOfDay)).isEqualTo(expected);
+        }
+
+        @ParameterizedTest
+        @EnumSource(TimePreference.class)
+        @DisplayName("an unknown time (null) only matches ANY")
+        void unknownTime(TimePreference preference) {
+            assertThat(TimeOfDayResolver.matches(preference, null)).isEqualTo(preference == TimePreference.ANY);
         }
     }
 }

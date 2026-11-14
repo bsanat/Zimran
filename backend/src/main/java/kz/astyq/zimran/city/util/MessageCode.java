@@ -10,4 +10,5 @@ import lombok.NoArgsConstructor;
 public final class MessageCode {
 
     public static final String CITY_NOT_SUPPORTED = "city_not_supported";
+    public static final String STATE_NOT_SUPPORTED = "state_not_supported";
 }

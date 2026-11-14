@@ -20,25 +20,18 @@ public final class BudgetEvaluator {
     /**
      * <ul>
      *   <li>no budget: WITHIN if the price is known, else UNKNOWN (never excluded);</li>
-     *   <li>budget 0 (free only): WITHIN only for a known minimum price of 0, everything else OVER;</li>
-     *   <li>budget above 0: WITHIN if the known minimum price fits, else OVER; an unknown price is UNKNOWN,
-     *       or OVER when {@code includeUnknownPrice} is false.</li>
+     *   <li>a budget (0 = free only): WITHIN only for a known USD minimum price at or below it; everything else,
+     *       an unknown price included, is OVER.</li>
      * </ul>
      * OVER means "exclude from the plan".
      */
-    public static BudgetFit evaluate(Event event, BigDecimal budgetMax, boolean includeUnknownPrice) {
+    public static BudgetFit evaluate(Event event, BigDecimal budgetMax) {
         Objects.requireNonNull(event, "event");
         boolean comparable = isComparable(event);
         if (budgetMax == null) {
             return comparable ? BudgetFit.WITHIN : BudgetFit.UNKNOWN;
         }
-        if (budgetMax.signum() == 0) {
-            return comparable && event.getPriceMin().signum() == 0 ? BudgetFit.WITHIN : BudgetFit.OVER;
-        }
-        if (!comparable) {
-            return includeUnknownPrice ? BudgetFit.UNKNOWN : BudgetFit.OVER;
-        }
-        return event.getPriceMin().compareTo(budgetMax) <= 0 ? BudgetFit.WITHIN : BudgetFit.OVER;
+        return comparable && event.getPriceMin().compareTo(budgetMax) <= 0 ? BudgetFit.WITHIN : BudgetFit.OVER;
     }
 
     private static boolean isComparable(Event event) {

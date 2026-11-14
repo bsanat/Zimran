@@ -12,7 +12,7 @@ public interface HintService {
 
     /**
      * At most 3 hints: first one per
-     * requested interest without provider coverage, then one per filter that removed events, the filter that
+     * requested interest without any event in the city, then one per filter that removed events, the filter that
      * removed the most first. When neither applies, a generic "change the date" hint.
      */
     List<String> buildHints(FilterStats stats, ValidatedPlanRequest request);
