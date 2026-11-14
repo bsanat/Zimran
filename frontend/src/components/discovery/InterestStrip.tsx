@@ -38,12 +38,12 @@ export function InterestStrip() {
     else nav.scrollBy({ left: Math.max(160, nav.clientWidth * .75), behavior });
   }
 
-  return <section className="container home-interests" aria-labelledby="home-interests-title">
-    <h2 id="home-interests-title">{t("Explore by interest")}</h2>
+  return <section className="container home-interests" aria-labelledby="interests-title">
+    <h2 id="interests-title">{t("Event categories")}</h2>
     <div className="interest-strip-shell">
-      <nav ref={strip} id="home-interest-strip" className="interest-strip" aria-labelledby="home-interests-title">
-        <Link href="/explore" className="interest-chip interest-chip-all">{t("All")}</Link>
-        {interests.map(interest => <Link key={interest.id} href={`/explore?category=${interest.id}`} className="interest-chip">{t(interest.label)}</Link>)}
+      <nav ref={strip} id="home-interest-strip" className="interest-strip" aria-labelledby="interests-title">
+        <Link href="/explore" className="interest-chip interest-chip-all"><Icon name="grid" size={16} />{t("All")}</Link>
+        {interests.map(interest => <Link key={interest.id} href={`/explore?category=${interest.id}`} className="interest-chip"><Icon name={interest.icon} size={16} />{t(interest.label)}</Link>)}
       </nav>
       {overflow && <button type="button" className="interest-strip-next" onClick={move} aria-controls="home-interest-strip" aria-label={t(atEnd ? "Back to first interest" : "More interests")} title={t(atEnd ? "Back to first interest" : "More interests")}><Icon name={atEnd ? "back" : "arrow"} size={18} /></button>}
     </div>

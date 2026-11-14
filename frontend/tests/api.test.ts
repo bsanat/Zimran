@@ -31,9 +31,24 @@ test("API preserves query filters and encodes source IDs", async (t) => {
   assert.equal(query.get("state"), "NY");
   assert.equal(query.get("major"), "true");
   assert.equal(query.get("keyword"), "live jazz");
+  assert.equal(query.has("budgetMax"), false);
   t.mock.method(globalThis, "fetch", async (url: string) => { calledUrl = url; return Response.json({ event }); });
   await getEvent("ticketmaster:fixture");
   assert.match(calledUrl, /\/api\/events\/ticketmaster%3Afixture$/);
+});
+
+test("catalog budgets preserve zero and omit an unbounded maximum", async t => {
+  const queries: URLSearchParams[] = [];
+  t.mock.method(globalThis, "fetch", async (url: string) => {
+    queries.push(new URL(url, "https://local.test").searchParams);
+    return Response.json({ events: [], pagination: { page: 1, pageSize: 12, hasMore: false } });
+  });
+  await getEvents({ budgetMax: 0 });
+  await getEvents({ budgetMax: 25 });
+  await getEvents({ budgetMax: undefined });
+  assert.equal(queries[0].get("budgetMax"), "0");
+  assert.equal(queries[1].get("budgetMax"), "25");
+  assert.equal(queries[2].has("budgetMax"), false);
 });
 
 test("POST sends the exact planner JSON and accepts a verified empty result", async (t) => {

@@ -11,5 +11,7 @@ export default async function ExplorePage({ searchParams }: { searchParams: Prom
   const city = source === "live" ? "New York" : typeof query.city === "string" && state?.cities.includes(query.city) ? query.city : "";
   const category = INTERESTS.find(interest => interest.id === normalizeCategory(typeof query.category === "string" ? query.category : ""))?.id ?? "";
   const keyword = typeof query.q === "string" ? query.q.trim().slice(0, 100) : "";
-  return <div className="container page-section"><ExploreEvents key={`${source}:${state?.code}:${city}:${category}:${keyword}`} initialState={state?.code ?? ""} initialCity={city} initialCategory={category} initialQuery={keyword} source={source} /></div>;
+  const budgetMax = typeof query.budgetMax === "string" && query.budgetMax.trim() ? Number(query.budgetMax) : NaN;
+  const initialBudgetMax = source === "catalog" && Number.isFinite(budgetMax) && budgetMax >= 0 ? budgetMax : undefined;
+  return <div className="container page-section"><ExploreEvents key={`${source}:${state?.code}:${city}:${category}:${keyword}:${initialBudgetMax}`} initialState={state?.code ?? ""} initialCity={city} initialCategory={category} initialQuery={keyword} initialBudgetMax={initialBudgetMax} source={source} /></div>;
 }

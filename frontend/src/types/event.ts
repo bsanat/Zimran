@@ -23,6 +23,7 @@ export interface EventData {
   sourceUrl: string | null;
   status: EventStatus;
   isMajor?: boolean;
+  isSocial?: boolean;
   sourceName?: string;
   lastVerifiedAt?: string;
   imageIsIllustration?: boolean;

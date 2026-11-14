@@ -29,13 +29,14 @@ export function catalogMatchesDate(event: EventData, date: string): boolean {
   return `${value("year")}-${value("month")}-${value("day")}` === date;
 }
 
-export function filterCatalogEvents(filters: { state?: string; city?: string; category?: string; date?: string; keyword?: string } = {}): CatalogEvent[] {
+export function filterCatalogEvents(filters: { state?: string; city?: string; category?: string; date?: string; keyword?: string; budgetMax?: number } = {}): CatalogEvent[] {
   const keyword = filters.keyword?.trim().toLocaleLowerCase("en-US");
   const today = getCityToday();
   return CATALOG_EVENTS.filter(event => (!(event.endDate || event.startDate) || (event.endDate || event.startDate)! >= today) &&
     (!filters.state || event.state === filters.state) &&
     (!filters.city || event.city === filters.city) && (!filters.category || event.category === filters.category) &&
     (!filters.date || catalogMatchesDate(event, filters.date)) &&
+    (filters.budgetMax === undefined || event.priceKnown && event.currency === "USD" && event.priceMin !== null && event.priceMin <= filters.budgetMax) &&
     (!keyword || [event.title, event.description, event.city, event.venue, event.category].some(value => value?.toLocaleLowerCase("en-US").includes(keyword))));
 }
 

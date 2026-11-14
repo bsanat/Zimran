@@ -1,0 +1,422 @@
+{
+  "ak-anchorage": {
+    "title": "Downtown Anchorage beneath the Chugach Mountains",
+    "author": "Didier Moïse",
+    "source": "https://commons.wikimedia.org/wiki/File:Anchorage,_Alaska,_USA.jpg",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0"
+  },
+  "al-huntsville": {
+    "title": "Downtown Huntsville, Alabama",
+    "author": "WeaponizingArchitecture",
+    "source": "https://commons.wikimedia.org/wiki/File:Huntsville,_Alabama_(2023).jpg",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0"
+  },
+  "ar-little-rock": {
+    "title": "Downtown Little Rock, Arkansas",
+    "author": "Quintin Soloviev",
+    "source": "https://commons.wikimedia.org/wiki/File:Little_Rock,_Arkansas_skyline.jpg",
+    "license": "CC BY 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/4.0"
+  },
+  "az-phoenix": {
+    "title": "Downtown Phoenix from the air",
+    "author": "DPPed",
+    "source": "https://commons.wikimedia.org/wiki/File:Downtown_Phoenix_Aerial_Looking_Northeast.jpg",
+    "license": "CC BY-SA 3.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0"
+  },
+  "ca-los-angeles": {
+    "title": "Hollywood Sign above Los Angeles",
+    "author": "Gnaphron",
+    "source": "https://commons.wikimedia.org/wiki/File:Hollywood_sign_(8485145044).jpg",
+    "license": "CC BY-SA 2.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/2.0"
+  },
+  "ca-san-diego": {
+    "title": "San Diego skyline",
+    "author": "Boatguy619",
+    "source": "https://commons.wikimedia.org/wiki/File:San_Diego_skyline_18_(cropped).jpg",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0"
+  },
+  "ca-san-francisco": {
+    "title": "Aerial view of San Francisco",
+    "author": "The wub",
+    "source": "https://commons.wikimedia.org/wiki/File:Aerial_view_of_San_Francisco,_30_Jun_2018_(cropped).jpg",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0"
+  },
+  "ca-san-jose": {
+    "title": "San Jose and Silicon Valley skyline",
+    "author": "Tom Pavel",
+    "source": "https://commons.wikimedia.org/wiki/File:San_Jose_and_Silicon_Valley_Skyline_Oct_2017.jpg",
+    "license": "CC BY 2.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/2.0"
+  },
+  "co-denver": {
+    "title": "Denver skyline from Speer Boulevard",
+    "author": "Xnatedawgx",
+    "source": "https://commons.wikimedia.org/wiki/File:Denver_skyline_from_Speer_Blvd_near_I-25,_April_2019.jpg",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0"
+  },
+  "ct-hartford": {
+    "title": "Hartford skyline",
+    "author": "Quintin Soloviev",
+    "source": "https://commons.wikimedia.org/wiki/File:Hartford,_CT_skyline_(cropped).jpg",
+    "license": "CC BY 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/4.0"
+  },
+  "dc-washington": {
+    "title": "The National Mall seen from the Washington Monument",
+    "author": "Gustav V.",
+    "source": "https://commons.wikimedia.org/wiki/File:National_mall_facing_east.jpg",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0"
+  },
+  "de-winterthur": {
+    "title": "Winterthur estate, Delaware",
+    "author": "Derek Ramsey (Ram-Man), © 2007",
+    "source": "https://commons.wikimedia.org/wiki/File:Winterthur_Museum_Building_Wide_Angle_2969px.jpg",
+    "license": "CC BY-SA 2.5",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/2.5"
+  },
+  "fl-jacksonville-beach": {
+    "title": "Jacksonville Beach, Florida",
+    "author": "Quintin Soloviev",
+    "source": "https://commons.wikimedia.org/wiki/File:Jacksonville_Beach,_Florida.jpg",
+    "license": "CC BY 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/4.0"
+  },
+  "fl-miami": {
+    "title": "Miami waterfront skyline",
+    "author": "Wilfredor",
+    "source": "https://commons.wikimedia.org/wiki/File:Miami,_Florida,_Skyline_4.jpg",
+    "license": "CC0",
+    "licenseUrl": "http://creativecommons.org/publicdomain/zero/1.0/deed.en"
+  },
+  "fl-miami-beach": {
+    "title": "Ocean Drive in Miami Beach",
+    "author": "chensiyuan",
+    "source": "https://commons.wikimedia.org/wiki/File:Ocean_drive_day_2009j.JPG",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0"
+  },
+  "ga-atlanta": {
+    "title": "Atlanta skyline",
+    "author": "AtlChampion",
+    "source": "https://commons.wikimedia.org/wiki/File:A2ATL20250614-0721_(cropped).jpg",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0"
+  },
+  "hi-honolulu": {
+    "title": "Honolulu from Diamond Head",
+    "author": "Farragutful",
+    "source": "https://commons.wikimedia.org/wiki/File:2022_Views_from_Diamond_Head_02.jpg",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0"
+  },
+  "ia-des-moines": {
+    "title": "Morning skyline along the Des Moines River",
+    "author": "Tony Webster from Minneapolis, Minnesota, United States",
+    "source": "https://commons.wikimedia.org/wiki/File:Morning_Skyline_-_Des_Moines,_Iowa_-_Winter_on_the_Des_Moines_River_(24805016620)_(cropped).jpg",
+    "license": "CC BY 2.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/2.0"
+  },
+  "id-boise": {
+    "title": "Boise Skyline, JUMP",
+    "author": "Tamanoeconomico",
+    "source": "https://commons.wikimedia.org/wiki/File:Boise_Skyline%2C_JUMP.jpg",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0/"
+  },
+  "il-chicago": {
+    "title": "Chicago Skyline in April 2024 b",
+    "author": "xiquinhosilva, crop by Georgfotoart",
+    "source": "https://commons.wikimedia.org/wiki/File:Chicago_Skyline_in_April_2024_b.jpg",
+    "license": "CC BY 2.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/2.0/"
+  },
+  "in-indianapolis": {
+    "title": "Indianapolis-1872529 1920 (cropped)",
+    "author": "Carol M. Highsmith, modified by tpsdave/12019",
+    "source": "https://commons.wikimedia.org/wiki/File:Indianapolis-1872529_1920_%28cropped%29.jpg",
+    "license": "CC0 1.0",
+    "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/"
+  },
+  "ks-olathe": {
+    "title": "Olathe City Hall",
+    "author": "KS123",
+    "source": "https://commons.wikimedia.org/wiki/File:Olathe_City_Hall.jpg",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0/"
+  },
+  "ky-mammoth-cave": {
+    "title": "Historic Entrance",
+    "author": "J. Miers (Jtesla16)",
+    "source": "https://commons.wikimedia.org/wiki/File:Historic_Entrance.JPG",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0/"
+  },
+  "la-new-orleans": {
+    "title": "Jackson Square",
+    "author": "Daniel Schwen (photograph), Clark Mills (sculpture)",
+    "source": "https://commons.wikimedia.org/wiki/File:Jackson_Square.jpg",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0/"
+  },
+  "ma-boston": {
+    "title": "Boston - panoramio (23)",
+    "author": "rokker",
+    "source": "https://commons.wikimedia.org/wiki/File:Boston_-_panoramio_%2823%29.jpg",
+    "license": "CC BY 3.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/3.0/"
+  },
+  "md-baltimore": {
+    "title": "Baltimore, Maryland skyline (cropped)",
+    "author": "Quintin Soloviev",
+    "source": "https://commons.wikimedia.org/wiki/File:Baltimore%2C_Maryland_skyline_%28cropped%29.jpg",
+    "license": "CC BY 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/4.0/"
+  },
+  "me-portland": {
+    "title": "DowntownPortlandMe1",
+    "author": "Jeffrey B. Ferland",
+    "source": "https://commons.wikimedia.org/wiki/File:DowntownPortlandMe1.jpg",
+    "license": "CC BY-SA 2.5",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/2.5/"
+  },
+  "mi-detroit": {
+    "title": "Detroit Skyline from Windsor 2025-09-01",
+    "author": "TheWxResearcher",
+    "source": "https://commons.wikimedia.org/wiki/File:Detroit_Skyline_from_Windsor_2025-09-01.jpg",
+    "license": "CC0 1.0",
+    "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/"
+  },
+  "mn-minneapolis": {
+    "title": "Minneapolis on Mississippi River",
+    "author": "Jdkoenig",
+    "source": "https://commons.wikimedia.org/wiki/File:Minneapolis_on_Mississippi_River.jpg",
+    "license": "Public domain",
+    "licenseUrl": "https://creativecommons.org/publicdomain/mark/1.0/"
+  },
+  "mo-st-louis": {
+    "title": "St Louis night expblend",
+    "author": "Daniel Schwen",
+    "source": "https://commons.wikimedia.org/wiki/File:St_Louis_night_expblend.jpg",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0/"
+  },
+  "ms-jackson": {
+    "title": "JacksonMS Downtown Panorama",
+    "author": "chmeredith",
+    "source": "https://commons.wikimedia.org/wiki/File:JacksonMS_Downtown_Panorama.jpg",
+    "license": "CC BY 2.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/2.0/"
+  },
+  "mt-bozeman": {
+    "title": "BozemanMainStreetEast2011",
+    "author": "Mike Cline",
+    "source": "https://commons.wikimedia.org/wiki/File:BozemanMainStreetEast2011.jpg",
+    "license": "CC0 1.0",
+    "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/"
+  },
+  "nc-charlotte": {
+    "title": "Uptown Charlotte 2018 taking by DJI Phantom 4 pro",
+    "author": "Precisionviews",
+    "source": "https://commons.wikimedia.org/wiki/File:Uptown_Charlotte_2018_taking_by_DJI_Phantom_4_pro.jpg",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0/"
+  },
+  "nd-fargo": {
+    "title": "Downtown Fargo Aerial - Facing Southeast (51009704407)",
+    "author": "formulanone",
+    "source": "https://commons.wikimedia.org/wiki/File:Downtown_Fargo_Aerial_-_Facing_Southeast_%2851009704407%29.jpg",
+    "license": "CC BY-SA 2.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/2.0/"
+  },
+  "ne-lincoln": {
+    "title": "Skyline of Downtown Lincoln, Nebraska, USA (2026) (cropped)",
+    "author": "Hanyou23",
+    "source": "https://commons.wikimedia.org/wiki/File:Skyline_of_Downtown_Lincoln%2C_Nebraska%2C_USA_%282026%29_%28cropped%29.jpg",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0/"
+  },
+  "nh-manchester": {
+    "title": "Manchester, New Hampshire skyline",
+    "author": "Quintin Soloviev",
+    "source": "https://commons.wikimedia.org/wiki/File:Manchester%2C_New_Hampshire_skyline.jpg",
+    "license": "CC BY 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/4.0/"
+  },
+  "nj-camden": {
+    "title": "Camden, New Jersey Waterfront view east across the Delaware River from Penn's Landing, Philadelphia, Pennsylvania, USA February 5th, 2011 - panoramio (1)",
+    "author": "Gary Miotla",
+    "source": "https://commons.wikimedia.org/wiki/File:Camden%2C_New_Jersey_Waterfront_view_east_across_the_Delaware_River_from_Penn%27s_Landing%2C_Philadelphia%2C_Pennsylvania%2C_USA_February_5th%2C_2011_-_panoramio_%281%29.jpg",
+    "license": "CC BY 3.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/3.0/"
+  },
+  "nm-albuquerque": {
+    "title": "Albuquerque, New Mexico skyline",
+    "author": "Quintin Soloviev",
+    "source": "https://commons.wikimedia.org/wiki/File:Albuquerque%2C_New_Mexico_skyline.jpg",
+    "license": "CC BY 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/4.0/"
+  },
+  "nm-carlsbad": {
+    "title": "Carlsbad, NM Panoramic",
+    "author": "Emann15",
+    "source": "https://commons.wikimedia.org/wiki/File:Carlsbad%2C_NM_Panoramic.jpg",
+    "license": "CC BY 3.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/3.0/"
+  },
+  "nv-las-vegas": {
+    "title": "Las Vegas from Frenchman 3",
+    "author": "Stan Shebs",
+    "source": "https://commons.wikimedia.org/wiki/File:Las_Vegas_from_Frenchman_3.jpg",
+    "license": "CC BY-SA 3.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0/"
+  },
+  "ny-new-york": {
+    "title": "New York and Jersey City Skyline Panorama",
+    "author": "Pierre Blaché",
+    "source": "https://commons.wikimedia.org/wiki/File:New_York_and_Jersey_City_Skyline_Panorama.jpg",
+    "license": "CC0 1.0",
+    "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/"
+  },
+  "oh-columbus": {
+    "title": "Downtown Columbus View from Main St Bridge - edit1",
+    "author": "Paul Wasneski",
+    "source": "https://commons.wikimedia.org/wiki/File:Downtown_Columbus_View_from_Main_St_Bridge_-_edit1.jpg",
+    "license": "Public domain",
+    "licenseUrl": "https://creativecommons.org/publicdomain/mark/1.0/"
+  },
+  "ok-tulsa": {
+    "title": "Tulsa skyline aerial, April 2023",
+    "author": "Nils Huenerfuerst",
+    "source": "https://commons.wikimedia.org/wiki/File:Tulsa_skyline_aerial,_April_2023.jpg",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0"
+  },
+  "or-portland": {
+    "title": "Portland from Pittock Mansion October 2019 panorama 2",
+    "author": "King of Hearts",
+    "source": "https://commons.wikimedia.org/wiki/File:Portland_from_Pittock_Mansion_October_2019_panorama_2.jpg",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0"
+  },
+  "pa-philadelphia": {
+    "title": "Philadelphia from South Street Bridge July 2016 panorama 3b",
+    "author": "King of Hearts ; modifications and annotations by Maps and stuff ( Brian W. Schaller )",
+    "source": "https://commons.wikimedia.org/wiki/File:Philadelphia_from_South_Street_Bridge_July_2016_panorama_3b.jpg",
+    "license": "CC BY-SA 3.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0"
+  },
+  "ri-providence": {
+    "title": "Downtown Providence drone flyover 2022 00.00.00",
+    "author": "Sean McVeigh",
+    "source": "https://commons.wikimedia.org/wiki/File:Downtown_Providence_drone_flyover_2022_00.00.00.jpg",
+    "license": "CC BY 3.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/3.0"
+  },
+  "sc-gadsden": {
+    "title": "Old Bluff Road, Near Congaree National Park, South Carolina (5810736408)",
+    "author": "Ken Lund from Reno, Nevada, USA",
+    "source": "https://commons.wikimedia.org/wiki/File:Old_Bluff_Road,_Near_Congaree_National_Park,_South_Carolina_(5810736408).jpg",
+    "license": "CC BY-SA 2.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/2.0"
+  },
+  "sd-sioux-falls": {
+    "title": "Downtown and Falls Park 03-16-24",
+    "author": "Maxpower2727",
+    "source": "https://commons.wikimedia.org/wiki/File:Downtown_and_Falls_Park_03-16-24.jpg",
+    "license": "CC0",
+    "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/deed.en"
+  },
+  "tn-nashville": {
+    "title": "Nashville from Cumberland River September 2026 005",
+    "author": "King of Hearts",
+    "source": "https://commons.wikimedia.org/wiki/File:Nashville_from_Cumberland_River_September_2026_005.jpg",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0"
+  },
+  "tx-austin": {
+    "title": "Downtown Austin, Texas from the Colorado River, October 2022",
+    "author": "Ryan Friesen",
+    "source": "https://commons.wikimedia.org/wiki/File:Downtown_Austin,_Texas_from_the_Colorado_River,_October_2022.jpg",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0"
+  },
+  "tx-dallas": {
+    "title": "Klyde Warren Park and Dallas' Skyline",
+    "author": "Gattacal",
+    "source": "https://commons.wikimedia.org/wiki/File:Klyde_Warren_Park_and_Dallas%27_Skyline.jpg",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0"
+  },
+  "tx-houston": {
+    "title": "Buildings-city-houston-skyline-1870617",
+    "author": "Jason Villanueva",
+    "source": "https://commons.wikimedia.org/wiki/File:Buildings-city-houston-skyline-1870617.jpg",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0"
+  },
+  "ut-salt-lake-city": {
+    "title": "SLC Skyline 2024",
+    "author": "Invictus323",
+    "source": "https://commons.wikimedia.org/wiki/File:SLC_Skyline_2024.jpg",
+    "license": "CC BY 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/4.0"
+  },
+  "va-virginia-beach": {
+    "title": "Virginia Beach looking north at 29th Street",
+    "author": "Dough4872",
+    "source": "https://commons.wikimedia.org/wiki/File:Virginia_Beach_looking_north_at_29th_Street.jpeg",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0"
+  },
+  "vt-essex-junction": {
+    "title": "DowntownEssexJct",
+    "author": "Mfwills",
+    "source": "https://commons.wikimedia.org/wiki/File:DowntownEssexJct.JPG",
+    "license": "CC BY-SA 3.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0"
+  },
+  "vt-rutland": {
+    "title": "Downtown Rutland, Vermont",
+    "author": "Sfoskett~commonswiki",
+    "source": "https://commons.wikimedia.org/wiki/File:Downtown_Rutland,_Vermont.jpg",
+    "license": "CC BY-SA 3.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0/"
+  },
+  "wa-seattle": {
+    "title": "Seattle skyline panorama from Kerry Park, June 2022",
+    "author": "SounderBruce",
+    "source": "https://commons.wikimedia.org/wiki/File:Seattle_skyline_panorama_from_Kerry_Park,_June_2022.jpg",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0"
+  },
+  "wi-milwaukee": {
+    "title": "Milwaukee Cityscape by Isaac Rowlett 2025",
+    "author": "Isaac Rowlett (Bfkenney)",
+    "source": "https://commons.wikimedia.org/wiki/File:Milwaukee_Cityscape_by_Isaac_Rowlett_2025.jpg",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0"
+  },
+  "wv-charleston": {
+    "title": "Charleston, West Virginia (2023)",
+    "author": "WeaponizingArchitecture",
+    "source": "https://commons.wikimedia.org/wiki/File:Charleston,_West_Virginia_(2023).jpg",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0"
+  },
+  "wy-cheyenne": {
+    "title": "CheyenneWyoming (cropped)",
+    "author": "Vasiliymeshko",
+    "source": "https://commons.wikimedia.org/wiki/File:CheyenneWyoming_(cropped).jpg",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0"
+  }
+}

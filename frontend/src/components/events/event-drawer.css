@@ -1,0 +1,18 @@
+html:has(.event-drawer[open]) { overflow: hidden; }
+.event-drawer {
+  position: fixed; inset: 10px 10px 10px auto; width: min(572px, calc(100vw - 20px));
+  height: calc(100dvh - 20px); max-height: none; max-width: none; margin: 0; padding: 0;
+  overflow: auto; overscroll-behavior: contain; border: 1px solid #e1e7eb; border-radius: 16px;
+  background: white; color: var(--ink); box-shadow: 0 15px 55px #1533412e;
+}
+.event-drawer::backdrop { background: rgb(33 63 77 / 12%); }
+.event-drawer-steps { display: flex; gap: 4px; margin-left: auto; }
+.drawer-icon-button {
+  display: inline-grid; place-items: center; flex: none; width: 36px; height: 36px;
+  padding: 0; border: 1px solid #dce4e8; border-radius: 9px; color: var(--ink); background: #fff;
+}
+.drawer-icon-button:enabled:hover, a.drawer-icon-button:hover { border-color: var(--primary); color: var(--primary-hover); }
+.drawer-icon-button:disabled { opacity: .34; }
+.drawer-up { transform: rotate(180deg); }
+.drawer-close-chevron { transform: rotate(-90deg); }
+.event-details-hint { display: inline-flex; align-items: center; gap: 4px; color: var(--primary-hover); font-size: 12px; font-weight: 600; }

@@ -38,9 +38,9 @@ export const TIME_OPTIONS: { label: string; value: TimePreference }[] = [
   { label: "Evening", value: "evening" },
 ];
 
-export function getCityToday(now = new Date()): string {
+export function getCityToday(now = new Date(), timeZone = "America/New_York"): string {
   const parts = new Intl.DateTimeFormat("en-US", {
-    timeZone: "America/New_York", year: "numeric", month: "2-digit", day: "2-digit",
+    timeZone, year: "numeric", month: "2-digit", day: "2-digit",
   }).formatToParts(now);
   const value = (type: string) => parts.find((part) => part.type === type)?.value;
   return `${value("year")}-${value("month")}-${value("day")}`;
@@ -53,7 +53,7 @@ export function createDefaultDraft(): PlannerDraft {
   };
 }
 
-function addDays(date: string, days: number): string {
+export function addDays(date: string, days: number): string {
   const value = new Date(`${date}T12:00:00Z`);
   value.setUTCDate(value.getUTCDate() + days);
   return value.toISOString().slice(0, 10);
