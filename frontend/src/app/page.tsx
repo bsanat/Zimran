@@ -2,6 +2,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { Icon } from "@/components/Icon";
 import { INTERESTS } from "@/lib/planner";
+import { InterestStrip } from "@/components/discovery/InterestStrip";
 import { UpcomingEvents } from "@/components/discovery/UpcomingEvents";
 import { LocationDirectory } from "@/components/discovery/LocationDirectory";
 import { getLanguage } from "@/lib/language-server";
@@ -15,33 +16,34 @@ const highlights = [
 export default async function Home() {
   const { t } = await getLanguage();
   return <>
-    <section className="container home-discovery" aria-labelledby="city-title">
-      <div className="home-discovery-heading">
-        <div>
-          <h1 id="city-title">{t("Things to do in New York")}</h1>
-          <p>{t("Explore concerts, exhibitions and food in the city, or build a plan around your interests.")}</p>
-          <Link href="/explore" className="button button-primary">
-            {t("Explore all events")} <Icon name="arrow" size={17} />
-          </Link>
-        </div>
-        <Image
-          className="home-city-photo" src="/new-york.jpg" alt={t("Manhattan skyline at sunset")}
-          width={1400} height={933} sizes="(min-width: 1344px) 556px, 44vw"
-          loading="eager" fetchPriority="high"
-        />
+    <section className="city-banner" aria-labelledby="city-title">
+      <Image
+        className="city-banner-photo" src="/photos/manhattan-panorama.webp" alt={t("Manhattan skyline seen from Liberty Island")}
+        fill sizes="100vw" loading="eager" fetchPriority="high"
+      />
+      <div className="container city-banner-copy">
+        <h1 id="city-title">
+          <a href="#locations" aria-label={t("New York — choose a city")}>
+            {t("New York")} <span><Icon name="chevron" size={16} /></span>
+          </a>
+        </h1>
+        <p>{t("Concerts, exhibitions and more to explore in the city.")}</p>
       </div>
-
+    </section>
+    <InterestStrip />
+    <section className="container home-discovery" aria-labelledby="city-picks">
+      <div className="section-heading">
+        <h2 id="city-picks">{t("Things to do in New York")}</h2>
+        <Link className="text-link" href="/explore">{t("Explore all events")}</Link>
+      </div>
       <nav className="home-highlights" aria-label={t("Event categories")}>
-        {highlights.map((item, index) => (
+        {highlights.map(item => (
           <Link key={item.id} href={`/explore?category=${item.id}`} className="home-highlight">
-            <Image
-              src={item.image} alt="" fill
-              sizes={index === 0 ? "(min-width: 1360px) 570px, 44vw" : "(min-width: 1360px) 344px, 28vw"}
-              loading="eager"
-            />
+            <span className="highlight-photo">
+              <Image src={item.image} alt="" fill sizes="(min-width: 1344px) 416px, 32vw" loading="eager" />
+            </span>
             <span className="highlight-caption">
-              {t(item.title)}
-              <span className="highlight-arrow"><Icon name="arrow" size={17} /></span>
+              {t(item.title)} <Icon name="arrow" size={17} />
             </span>
           </Link>
         ))}
