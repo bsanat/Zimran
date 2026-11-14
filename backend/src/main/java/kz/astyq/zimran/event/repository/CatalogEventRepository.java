@@ -18,6 +18,8 @@ public interface CatalogEventRepository extends JpaRepository<CatalogEvent, Long
 
     List<CatalogEvent> findByProviderAndProviderEventIdIn(String provider, Collection<String> providerEventIds);
 
+    List<CatalogEvent> findByDemoTrueAndFirstSeenAtGreaterThanEqualOrderByFirstSeenAtAscIdAsc(Instant since);
+
     /**
      * Takes the transaction-scoped advisory lock {@code key}, waiting while another transaction holds it; it is
      * released at commit or rollback. Serializes catalog upserts across threads and instances. Call inside a

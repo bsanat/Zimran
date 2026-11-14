@@ -15,7 +15,8 @@ public enum RateLimitAction {
     PAIR_CREATE,
     BUDDY_POST,
     BUDDY_REQUEST,
-    ALERTS_CHECK;
+    ALERTS_CHECK,
+    DEMO_EVENT;
 
     /** Wire id, e.g. {@code ai_parse}; returned in {@code details.action}. */
     private final String id = name().toLowerCase(Locale.ROOT);

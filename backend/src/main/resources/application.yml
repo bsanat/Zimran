@@ -421,6 +421,7 @@ app:
       buddy-post: { capacity: 5, refill-period: 1h }
       buddy-request: { capacity: 20, refill-period: 1h }
       alerts-check: { capacity: 6, refill-period: 1m }
+      demo-event: { capacity: 10, refill-period: 1m }
   ai:
     # AI assistant (POST /api/ai/recommend): events sent to the model per recommendation.
     max-candidates: 20
