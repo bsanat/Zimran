@@ -13,6 +13,10 @@ springdoc-openapi. Build: ./mvnw. Base package: kz.astyq.zimran.
 
 Do not never broke SOLID principles.
 
+No testing needed: do not write new tests and do not run tests (including ./mvnw verify) unless
+explicitly asked. Only keep existing test sources compiling when a change breaks them. This overrides
+the "Tests mirror..." and "Run ./mvnw verify" rules below.
+
 ## Project structure (same layering as our restaurant-service)
 
 Feature-first. Inside each feature package:

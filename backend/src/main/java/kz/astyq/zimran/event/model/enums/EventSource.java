@@ -6,10 +6,12 @@ import java.util.Optional;
 
 /**
  * Where an event comes from. {@link #getCode()} is the {@code source} field and the prefix of public event ids
- * ({@code json:<sourceEventId>}).
+ * ({@code json:<sourceEventId>}). {@link #DEMO} marks the fictional sample events seeded when
+ * {@code app.demo.enabled=true}; no provider fetches them.
  */
 public enum EventSource {
-    JSON;
+    JSON,
+    DEMO;
 
     public String getCode() {
         return name().toLowerCase(Locale.ROOT);

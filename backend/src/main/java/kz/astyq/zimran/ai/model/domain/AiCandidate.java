@@ -17,6 +17,7 @@ public class AiCandidate {
     String id;
     @NonNull
     String title;
+    /** Shared category slug ({@code CategorySlug} id), the vocabulary of catalog, AI and alerts. */
     @NonNull
     String category;
     @NonNull

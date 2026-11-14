@@ -4,8 +4,8 @@ import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
 /**
- * AI message keys in {@code messages*.properties}. AI errors never reach the client (the planner falls back),
- * the key only names the failure in logs.
+ * AI message keys in {@code messages*.properties}. The planner falls back when AI fails; the AI assistant
+ * answers {@code 503 AI_UNAVAILABLE} with this message.
  */
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class MessageCode {

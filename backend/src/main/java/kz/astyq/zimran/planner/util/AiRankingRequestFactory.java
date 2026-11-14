@@ -25,8 +25,11 @@ public final class AiRankingRequestFactory {
 
     private static final DateTimeFormatter LOCAL_START = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm (EEE)", Locale.ENGLISH);
 
+    /**
+     * @param withSuggestions whether the model also writes tips for the guest
+     */
     public static AiRankingRequest create(ValidatedPlanRequest request, List<Candidate> candidates, String language,
-                                          int maxPicks) {
+                                          int maxPicks, boolean withSuggestions) {
         return AiRankingRequest.builder()
                 .language(language)
                 .city(request.getCity().getName())
@@ -36,17 +39,22 @@ public final class AiRankingRequestFactory {
                 .timePreference(request.getTimePreference().getId())
                 .budget(budget(request.getBudgetMax()))
                 .notes(request.getNotes())
+                .message(request.getMessage())
                 .candidates(candidates.stream().map(candidate -> candidate(candidate, request)).toList())
                 .maxPicks(maxPicks)
+                .withSuggestions(withSuggestions)
                 .build();
     }
 
-    private static AiCandidate candidate(Candidate candidate, ValidatedPlanRequest request) {
+    /**
+     * One candidate as the model sees it; a multi-day event shows its first day within the request dates.
+     */
+    public static AiCandidate candidate(Candidate candidate, ValidatedPlanRequest request) {
         Event event = candidate.getEvent();
         return AiCandidate.builder()
                 .id(event.getId().asString())
                 .title(event.getTitle())
-                .category(event.getCategory().getId())
+                .category(event.getCategorySlug().getId())
                 .interests(event.getInterests().stream().sorted().map(Interest::getId).toList())
                 .start(start(event, request))
                 .venue(event.getVenue())
@@ -87,7 +95,10 @@ public final class AiRankingRequestFactory {
         return event.getPriceMin().toPlainString() + currency;
     }
 
-    private static String budget(BigDecimal budgetMax) {
+    /**
+     * The budget in words for the model; null = no limit.
+     */
+    public static String budget(BigDecimal budgetMax) {
         if (budgetMax == null) {
             return null;
         }

@@ -57,6 +57,9 @@ public class EventViewServiceImpl implements EventViewService {
                 .interests(interests)
                 .keyword(request.getKeyword())
                 .majorOnly("true".equals(request.getMajor()))
+                .categorySlug(request.getCategorySlug())
+                .budgetMax(request.getBudgetMax())
+                .freeOnly("true".equals(request.getFreeOnly()))
                 .build());
 
         int page = request.getPage() != null ? request.getPage() : EventSearchRequest.DEFAULT_PAGE;

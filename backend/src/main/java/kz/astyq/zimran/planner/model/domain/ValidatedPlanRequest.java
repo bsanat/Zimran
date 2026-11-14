@@ -12,11 +12,11 @@ import java.time.LocalDate;
 import java.util.Set;
 
 /**
- * A plan request that passed validation, with defaults applied. {@code notes} is sanitized but still
- * untrusted text; null when the guest wrote nothing.
+ * A plan request that passed validation, with defaults applied. {@code notes} and {@code message} are sanitized
+ * but still untrusted text; null when the guest wrote nothing.
  */
 @Value
-@Builder
+@Builder(toBuilder = true)
 public class ValidatedPlanRequest {
 
     @NonNull
@@ -32,4 +32,6 @@ public class ValidatedPlanRequest {
     @NonNull
     TimePreference timePreference;
     String notes;
+    /** The guest's original free-text request (AI assistant); null for a form-based plan. */
+    String message;
 }

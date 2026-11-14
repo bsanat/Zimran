@@ -2,11 +2,13 @@ package kz.astyq.zimran.event.model.dto;
 
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
+import kz.astyq.zimran.event.model.enums.CategorySlug;
 import kz.astyq.zimran.event.model.enums.Interest;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -15,6 +17,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.springframework.format.annotation.DateTimeFormat;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 
 /**
@@ -52,6 +55,20 @@ public class EventSearchRequest {
 
     @Parameter(description = "Interest id", schema = @Schema(type = "string", example = "music"))
     private Interest category;
+
+    @Parameter(description = "Shared category slug (see GET /api/meta)",
+            schema = @Schema(type = "string", example = "food_drinks"))
+    private CategorySlug categorySlug;
+
+    @DecimalMin("0")
+    @Parameter(description = "Highest acceptable lowest ticket price in USD; events with an unknown price are excluded",
+            schema = @Schema(type = "number", example = "30"))
+    private BigDecimal budgetMax;
+
+    @Pattern(regexp = "true|false")
+    @Parameter(description = "true = only events the source says are free; unknown prices are excluded",
+            schema = @Schema(type = "string", allowableValues = {"true", "false"}))
+    private String freeOnly;
 
     @Size(max = MAX_KEYWORD_LENGTH)
     @Parameter(description = "Case-insensitive text in the title, description or venue")

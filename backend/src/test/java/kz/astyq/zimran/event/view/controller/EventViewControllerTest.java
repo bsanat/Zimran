@@ -41,7 +41,7 @@ class EventViewControllerTest {
 
     private static final List<String> EVENT_KEYS = List.of("id", "source", "sourceEventId", "title", "category",
             "city", "startAt", "timezone", "venue", "address", "description", "imageUrl", "currency", "sourceUrl",
-            "priceMin", "priceMax", "priceKnown", "status", "isMajor", "dateText", "priceText");
+            "priceMin", "priceMax", "priceKnown", "status", "isMajor", "dateText", "priceText", "categorySlug", "isDemo");
 
     @Autowired
     private MockMvc mockMvc;
@@ -70,6 +70,8 @@ class EventViewControllerTest {
                 .andExpect(jsonPath("$.events[0].category").value("music"))
                 .andExpect(jsonPath("$.events[0].status").value("scheduled"))
                 .andExpect(jsonPath("$.events[0].isMajor").value(false))
+                .andExpect(jsonPath("$.events[0].isDemo").value(false))
+                .andExpect(jsonPath("$.events[0].categorySlug").value("music"))
                 .andExpect(jsonPath("$.events[0].startAt").value("2026-11-20T20:00:00-05:00"))
                 .andExpect(jsonPath("$.events[0].priceMin").value(nullValue()))
                 .andExpect(jsonPath("$.events[0].priceKnown").value(false));
@@ -90,6 +92,12 @@ class EventViewControllerTest {
                 .andExpect(status().isBadRequest()).andExpect(jsonPath("$.error.details.field").value("page"));
         mockMvc.perform(get("/api/events").param("city", "New York").param("keyword", "k".repeat(101)))
                 .andExpect(status().isBadRequest()).andExpect(jsonPath("$.error.details.field").value("keyword"));
+        mockMvc.perform(get("/api/events").param("city", "New York").param("categorySlug", "opera"))
+                .andExpect(status().isBadRequest()).andExpect(jsonPath("$.error.details.field").value("categorySlug"));
+        mockMvc.perform(get("/api/events").param("city", "New York").param("budgetMax", "-1"))
+                .andExpect(status().isBadRequest()).andExpect(jsonPath("$.error.details.field").value("budgetMax"));
+        mockMvc.perform(get("/api/events").param("city", "New York").param("freeOnly", "yes"))
+                .andExpect(status().isBadRequest()).andExpect(jsonPath("$.error.details.field").value("freeOnly"));
         mockMvc.perform(get("/api/events").param("city", "New York").param("major", "yes"))
                 .andExpect(status().isBadRequest()).andExpect(jsonPath("$.error.details.field").value("major"));
         mockMvc.perform(get("/api/events"))

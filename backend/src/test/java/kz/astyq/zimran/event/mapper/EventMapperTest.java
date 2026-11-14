@@ -74,6 +74,19 @@ class EventMapperTest {
             assertThat(response.getSourceUrl()).isEqualTo("https://tickets.example.com/jazz");
             assertThat(response.getStatus()).isEqualTo(EventStatus.POSTPONED);
             assertThat(response.isMajor()).isTrue();
+            assertThat(response.getCategorySlug()).isEqualTo("music");
+            assertThat(response.isDemo()).isFalse();
+        }
+
+        @Test
+        @DisplayName("categorySlug is the slug of the primary interest; demo flag is passed on")
+        void slugAndDemo() {
+            EventViewResponse response = mapper.toViewResponse(
+                    TestEvents.interests(TestEvents.event("d"), Interest.FOOD).demo(true).build());
+
+            assertThat(response.getCategory()).isEqualTo("food");
+            assertThat(response.getCategorySlug()).isEqualTo("food_drinks");
+            assertThat(response.isDemo()).isTrue();
         }
 
         @Test

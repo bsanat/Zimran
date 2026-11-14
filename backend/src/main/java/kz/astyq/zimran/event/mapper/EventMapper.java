@@ -3,6 +3,7 @@ package kz.astyq.zimran.event.mapper;
 import kz.astyq.zimran.event.model.domain.Event;
 import kz.astyq.zimran.event.model.domain.EventId;
 import kz.astyq.zimran.event.model.dto.EventViewResponse;
+import kz.astyq.zimran.event.model.enums.CategorySlug;
 import kz.astyq.zimran.event.model.enums.Interest;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -31,6 +32,10 @@ public interface EventMapper {
 
     default String map(Interest interest) {
         return interest != null ? interest.getId() : null;
+    }
+
+    default String map(CategorySlug slug) {
+        return slug != null ? slug.getId() : null;
     }
 
     default String map(ZoneId zone) {

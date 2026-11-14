@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import tools.jackson.databind.JsonNode;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -17,6 +18,7 @@ import java.util.Optional;
  * {"summary": string, "recommendations": [{"eventId": string, "matchScore": integer, "reason": string}],
  *  "suggestions": [string]}
  * </pre>
+ * {@code suggestions} is in the schema only when asked for; a missing array parses as no suggestions.
  * The check never trusts the model: wrong types drop the item (or the whole answer when the top level is
  * wrong), scores are clamped to 0..100, all text is sanitized and capped.
  */
@@ -32,8 +34,11 @@ public final class RankingResponseSchema {
 
     /**
      * {@code response_format} value for the chat completions request.
+     *
+     * @param withSuggestions whether the answer has the {@code suggestions} array; without it the model can only
+     *                        return picks (id, score, reason) and the summary
      */
-    public static Map<String, Object> responseFormat() {
+    public static Map<String, Object> responseFormat(boolean withSuggestions) {
         Map<String, Object> pick = Map.of(
                 "type", "object",
                 "additionalProperties", false,
@@ -42,14 +47,19 @@ public final class RankingResponseSchema {
                         "eventId", Map.of("type", "string"),
                         "matchScore", Map.of("type", "integer"),
                         "reason", Map.of("type", "string")));
+        Map<String, Object> properties = new LinkedHashMap<>();
+        properties.put("summary", Map.of("type", "string"));
+        properties.put("recommendations", Map.of("type", "array", "items", pick));
+        List<String> required = new ArrayList<>(List.of("summary", "recommendations"));
+        if (withSuggestions) {
+            properties.put("suggestions", Map.of("type", "array", "items", Map.of("type", "string")));
+            required.add("suggestions");
+        }
         Map<String, Object> schema = Map.of(
                 "type", "object",
                 "additionalProperties", false,
-                "required", List.of("summary", "recommendations", "suggestions"),
-                "properties", Map.of(
-                        "summary", Map.of("type", "string"),
-                        "recommendations", Map.of("type", "array", "items", pick),
-                        "suggestions", Map.of("type", "array", "items", Map.of("type", "string"))));
+                "required", List.copyOf(required),
+                "properties", properties);
         return Map.of("type", "json_schema",
                 "json_schema", Map.of("name", NAME, "strict", true, "schema", schema));
     }
