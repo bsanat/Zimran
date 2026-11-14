@@ -16,6 +16,9 @@ import java.util.List;
 @Builder
 public class AssistantRecommendation {
 
+    /** The ranked plan's id; null when there were no candidates (no AI call). */
+    String planId;
+
     @NonNull
     String summary;
     @NonNull

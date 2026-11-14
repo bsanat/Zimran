@@ -11,7 +11,7 @@ import lombok.Setter;
 import java.util.List;
 
 /**
- * The parts of an OpenAI chat completion the ranking reads.
+ * The parts of a chat completion (Gemini's OpenAI-compatible endpoint) the ranking reads.
  */
 @Getter
 @Setter

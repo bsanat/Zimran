@@ -8,7 +8,7 @@ import kz.astyq.zimran.core.configuration.EventSourceProperties;
 import kz.astyq.zimran.core.configuration.FrontendProperties;
 import kz.astyq.zimran.core.configuration.GuestProperties;
 import kz.astyq.zimran.core.configuration.IngestionProperties;
-import kz.astyq.zimran.core.configuration.OpenAiProperties;
+import kz.astyq.zimran.core.configuration.GeminiProperties;
 import kz.astyq.zimran.core.configuration.PairProperties;
 import kz.astyq.zimran.core.configuration.PlannerProperties;
 import kz.astyq.zimran.core.configuration.RateLimitProperties;
@@ -28,7 +28,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 		CorsProperties.class,
 		WebProperties.class,
 		EventSourceProperties.class,
-		OpenAiProperties.class,
+		GeminiProperties.class,
 		PlannerProperties.class,
 		GuestProperties.class,
 		SubscriptionProperties.class,

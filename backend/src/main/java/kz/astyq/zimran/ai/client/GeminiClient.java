@@ -3,9 +3,9 @@ package kz.astyq.zimran.ai.client;
 import kz.astyq.zimran.ai.model.dto.ChatCompletionRequest;
 
 /**
- * OpenAI chat completions.
+ * Google Gemini chat completions (OpenAI-compatible endpoint, {@code app.gemini.base-url}).
  */
-public interface OpenAiClient {
+public interface GeminiClient {
 
     /**
      * Content of the first choice. No API key, HTTP or network error, timeout, refusal, truncated or empty

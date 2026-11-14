@@ -141,7 +141,7 @@ docker compose up -d postgres
 EVENTS_JSON_SOURCE=../frontend/src/data/catalog.json EVENT_INGESTION_ENABLED=false DEMO_ENABLED=false sh ./mvnw -Dmaven.test.skip=true spring-boot:run
 ```
 
-Настройки БД по умолчанию совпадают с локальным `docker-compose.yml`. Backend доступен на `http://localhost:8080`; переменные конфигурации описаны в [backend/.env.example](backend/.env.example). OpenAI-ключ нужен для внешнего ранжирования, а не для просмотра frontend-каталога. Для подключения frontend задайте `API_PROXY_ORIGIN=http://localhost:8080` в `frontend/.env.local` и перезапустите Next.js. Гостевые Buddy/Pair/Alerts пока используют встроенный сервер frontend. Запуск Java backend при подготовке этого README не повторялся.
+Настройки БД по умолчанию совпадают с локальным `docker-compose.yml`. Backend доступен на `http://localhost:8080`; переменные конфигурации описаны в [backend/.env.example](backend/.env.example). Для AI (чат ассистента, ранжирование, пояснения Pair) нужен бесплатный ключ Google Gemini (`GEMINI_API_KEY`, https://aistudio.google.com/apikey); без него backend запускается, а планировщик ранжирует по правилам. Каталог событий backend читает из `frontend/src/data/catalog.json`. Для подключения frontend задайте `API_PROXY_ORIGIN=http://localhost:8080` в `frontend/.env.local` и перезапустите Next.js: тогда каталог, планировщик, AI-чат, Pair, Event Buddy (с жалобами и блокировками), оповещения и подписка работают через backend (для Premium Demo — `DEMO_ENABLED=true`). Запуск Java backend при подготовке этого README не повторялся.
 
 ## Как это устроено
 
@@ -158,7 +158,7 @@ flowchart LR
     W -. дополнительные режимы .-> X[SerpApi или внешний backend]
 ```
 
-**Что означает AI Assistant в текущем MVP.** Встроенный чат использует разбор текста по правилам на трёх языках и подбор из каталога. Он не вызывает генеративную модель и не создаёт события. В монорепозитории также есть отдельный Java 21 / Spring Boot / PostgreSQL backend с адаптером OpenAI для ранжирования; это отдельный режим, не основание приписывать LLM локальному чату. Полное объединение гостевых frontend-сценариев с Java backend ещё не завершено.
+**Что означает AI Assistant в текущем MVP.** С подключённым Java backend (`API_PROXY_ORIGIN`) чат отправляет каждое сообщение в `POST /api/ai/chat`: Google Gemini (бесплатный ключ AI Studio) разбирает сообщение и ранжирует события из проверенного каталога, а сервер проверяет каждое поле и сам задаёт уточняющие вопросы фиксированными текстами. Модель не создаёт события и не меняет их данные: от неё приходят только выбор из переданных кандидатов и пояснение. Без backend чат недоступен; встроенный разбор по правилам остаётся только в серверных маршрутах frontend.
 
 | Область | Где читать код |
 | --- | --- |

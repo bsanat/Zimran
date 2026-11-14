@@ -5,7 +5,7 @@ import com.github.tomakehurst.wiremock.core.WireMockConfiguration;
 import kz.astyq.zimran.ai.model.dto.ChatCompletionRequest;
 import kz.astyq.zimran.ai.model.dto.ChatMessage;
 import kz.astyq.zimran.core.configuration.HttpClientConfig;
-import kz.astyq.zimran.core.configuration.OpenAiProperties;
+import kz.astyq.zimran.core.configuration.GeminiProperties;
 import kz.astyq.zimran.core.exception.ServiceValidationException;
 import kz.astyq.zimran.core.util.ErrorCode;
 import org.junit.jupiter.api.AfterEach;
@@ -28,21 +28,21 @@ import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-class OpenAiClientImplTest {
+class GeminiClientImplTest {
 
     private WireMockServer wireMock;
-    private OpenAiProperties properties;
-    private OpenAiClientImpl client;
+    private GeminiProperties properties;
+    private GeminiClientImpl client;
 
     @BeforeEach
     void setUp() {
         wireMock = new WireMockServer(WireMockConfiguration.options().dynamicPort());
         wireMock.start();
-        properties = new OpenAiProperties();
+        properties = new GeminiProperties();
         properties.setApiKey("sk-test");
         RestClient restClient = HttpClientConfig.restClient(RestClient.builder(), Duration.ofSeconds(1),
                 Duration.ofMillis(500), wireMock.baseUrl());
-        client = new OpenAiClientImpl(restClient, properties);
+        client = new GeminiClientImpl(restClient, properties);
     }
 
     @AfterEach

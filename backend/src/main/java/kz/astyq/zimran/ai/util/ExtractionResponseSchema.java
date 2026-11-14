@@ -13,7 +13,7 @@ import java.util.Map;
 import java.util.Optional;
 
 /**
- * The JSON schema of the filter-extraction answer (OpenAI strict structured output), and its server-side check:
+ * The JSON schema of the filter-extraction answer (strict JSON-schema structured output), and its server-side check:
  * <pre>
  * {"city": string|null, "state": string|null, "interests": [category], "dateFrom": string|null,
  *  "dateTo": string|null, "timeOfDay": string|null, "budgetMax": number|null, "notes": string|null}

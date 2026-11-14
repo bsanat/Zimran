@@ -8,6 +8,8 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
+import kz.astyq.zimran.assistant.model.dto.AssistantChatRequest;
+import kz.astyq.zimran.assistant.model.dto.AssistantChatViewResponse;
 import kz.astyq.zimran.assistant.model.dto.AssistantParseRequest;
 import kz.astyq.zimran.assistant.model.dto.AssistantParseViewResponse;
 import kz.astyq.zimran.assistant.model.dto.AssistantRecommendRequest;
@@ -52,6 +54,35 @@ public class AssistantViewController {
                                                             HttpServletRequest httpRequest) {
         return ResponseEntity.ok().cacheControl(CacheControl.noStore())
                 .body(assistantViewService.parse(request, scope, httpRequest.getRemoteAddr()));
+    }
+
+    @Operation(summary = "Chat with the AI assistant (Gemini)",
+            description = "One chat turn: send the new message plus the preferences and conversationId of the "
+                    + "previous answer. The AI reads the message; the server validates and merges it. While city, "
+                    + "interests or dates are missing the answer asks for them (clarifications, i18n texts). Then "
+                    + "the AI ranks matching catalog events (result). The first result counts the assistant quota "
+                    + "once and returns a conversationId; later results in that conversation are turns (limit "
+                    + "app.ai.max-conversation-turns, open for app.ai.conversation-ttl). Needs a guest session.",
+            security = @SecurityRequirement(name = OpenApiConfig.GUEST_TOKEN_SCHEME))
+    @ApiResponse(responseCode = "200", description = "The chat answer")
+    @ApiResponse(responseCode = "400", description = "Blank or too long message, or invalid preferences",
+            content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+    @ApiResponse(responseCode = "401", description = "Missing, invalid or expired X-Guest-Token",
+            content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+    @ApiResponse(responseCode = "403", description = "Free assistant quota used up (FREE_LIMIT_REACHED)",
+            content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+    @ApiResponse(responseCode = "404", description = "Unknown conversation (ASSISTANT_CONVERSATION_NOT_FOUND)",
+            content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+    @ApiResponse(responseCode = "410", description = "Conversation expired (ASSISTANT_CONVERSATION_EXPIRED)",
+            content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+    @ApiResponse(responseCode = "429", description = "Too many requests, or the conversation's turn limit "
+            + "(ASSISTANT_TURN_LIMIT)", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+    @ApiResponse(responseCode = "503", description = "AI or event source unavailable",
+            content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+    @PostMapping(value = "/chat", consumes = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<AssistantChatViewResponse> chat(@Valid @RequestBody AssistantChatRequest request,
+                                                          @CurrentScope RequestScope scope) {
+        return ResponseEntity.ok().cacheControl(CacheControl.noStore()).body(assistantViewService.chat(request, scope));
     }
 
     @Operation(summary = "Recommend events for the filters",

@@ -6,7 +6,7 @@ import kz.astyq.zimran.ai.service.AiCompletionService;
 import kz.astyq.zimran.ai.service.AiPairReasonService;
 import kz.astyq.zimran.ai.util.PairReasonPromptBuilder;
 import kz.astyq.zimran.ai.util.PairReasonResponseSchema;
-import kz.astyq.zimran.core.configuration.OpenAiProperties;
+import kz.astyq.zimran.core.configuration.GeminiProperties;
 import kz.astyq.zimran.core.exception.ServiceValidationException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -23,7 +23,7 @@ import java.util.Optional;
 public class AiPairReasonServiceImpl implements AiPairReasonService {
 
     private final AiCompletionService aiCompletionService;
-    private final OpenAiProperties properties;
+    private final GeminiProperties properties;
     private final JsonMapper jsonMapper;
 
     @Override

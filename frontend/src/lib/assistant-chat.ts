@@ -13,7 +13,7 @@ export interface AssistantTurn {
 const record = (value: unknown): value is Record<string, unknown> => typeof value === "object" && value !== null && !Array.isArray(value);
 
 export function isAssistantChatResponse(value: unknown): value is AssistantChatResponse {
-  if (!record(value) || value.engine !== "catalog" || !record(value.preferences) ||
+  if (!record(value) || !["catalog", "ai"].includes(value.engine as string) || !record(value.preferences) ||
     !Array.isArray(value.clarifications) || value.clarifications.length > 10 || !value.clarifications.every(item => typeof item === "string" && item.length <= 500) ||
     !(value.result === null || isPlannerResponse(value.result)) ||
     (value.conversationId !== undefined && (typeof value.conversationId !== "string" || !/^[a-zA-Z0-9_-]{16,128}$/.test(value.conversationId))) ||

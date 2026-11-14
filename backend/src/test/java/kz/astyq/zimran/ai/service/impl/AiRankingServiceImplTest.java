@@ -5,7 +5,7 @@ import kz.astyq.zimran.ai.model.domain.AiRanking;
 import kz.astyq.zimran.ai.model.domain.AiRankingRequest;
 import kz.astyq.zimran.ai.service.AiCompletionService;
 import kz.astyq.zimran.ai.util.MessageCode;
-import kz.astyq.zimran.core.configuration.OpenAiProperties;
+import kz.astyq.zimran.core.configuration.GeminiProperties;
 import kz.astyq.zimran.core.exception.ServiceValidationException;
 import kz.astyq.zimran.core.util.ErrorCode;
 import org.junit.jupiter.api.BeforeEach;
@@ -37,7 +37,7 @@ class AiRankingServiceImplTest {
     @Mock
     private AiCompletionService aiCompletionService;
 
-    private final OpenAiProperties properties = new OpenAiProperties();
+    private final GeminiProperties properties = new GeminiProperties();
     private AiRankingServiceImpl service;
 
     @BeforeEach

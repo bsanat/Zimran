@@ -14,6 +14,11 @@ public interface DemoViewService {
     SubscriptionViewResponse activatePremium(RequestScope scope);
 
     /**
+     * "End Premium Demo": returns the caller from demo Premium to Free and returns the updated subscription.
+     */
+    SubscriptionViewResponse deactivatePremium(RequestScope scope);
+
+    /**
      * Adds one fictional sample event to the catalog (caller must be {@code DEMO_PREMIUM}; rate limited).
      */
     EventDetailsViewResponse createEvent(DemoEventCreateRequest request, RequestScope scope);

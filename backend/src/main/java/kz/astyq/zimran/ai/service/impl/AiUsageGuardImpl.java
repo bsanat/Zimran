@@ -1,7 +1,7 @@
 package kz.astyq.zimran.ai.service.impl;
 
 import kz.astyq.zimran.ai.service.AiUsageGuard;
-import kz.astyq.zimran.core.configuration.OpenAiProperties;
+import kz.astyq.zimran.core.configuration.GeminiProperties;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -16,7 +16,7 @@ public class AiUsageGuardImpl implements AiUsageGuard {
 
     static final long WINDOW_MILLIS = 60_000;
 
-    private final OpenAiProperties properties;
+    private final GeminiProperties properties;
     private final Clock clock;
 
     private long windowStart = Long.MIN_VALUE;

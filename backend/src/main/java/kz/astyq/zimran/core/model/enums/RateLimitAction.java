@@ -15,6 +15,7 @@ public enum RateLimitAction {
     PAIR_CREATE,
     BUDDY_POST,
     BUDDY_REQUEST,
+    REPORT_CREATE,
     ALERTS_CHECK,
     DEMO_EVENT;
 

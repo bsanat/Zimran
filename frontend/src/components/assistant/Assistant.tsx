@@ -8,7 +8,7 @@ import { EventImage } from "@/components/events/EventCard";
 import { EventLink } from "@/components/events/EventLink";
 import { ApiError } from "@/lib/api";
 import { isAssistantChatResponse, restoreAssistantTurns, type AssistantTurn } from "@/lib/assistant-chat";
-import { getDemoToken } from "@/lib/demo-api";
+import { assistantChat } from "@/lib/backend-api";
 import { formatEventDate, formatPrice, safeExternalUrl } from "@/lib/planner";
 import type { AssistantChatResponse } from "@/types/assistant";
 
@@ -16,26 +16,11 @@ const storageKey = "outly-assistant-chat-v3";
 const examples = ["NYC, free games this Thursday", "New York, family activities this weekend", "New York, free running next Tuesday"];
 const endedChatCodes = ["ASSISTANT_CONVERSATION_NOT_FOUND", "ASSISTANT_CONVERSATION_EXPIRED", "ASSISTANT_TURN_LIMIT"];
 
+// Each turn goes to the Spring backend (POST /api/ai/chat), where Google Gemini reads the message and ranks events.
 async function chat(message: string, previous: AssistantChatResponse | undefined, signal: AbortSignal): Promise<AssistantChatResponse> {
-  const bearer = await getDemoToken();
-  let response: Response;
-  try {
-    response = await fetch("/api/ai/chat", {
-      method: "POST", headers: { "Content-Type": "application/json", Authorization: `Bearer ${bearer}` },
-      body: JSON.stringify({ message, preferences: previous?.preferences, pendingFields: previous?.pendingFields, conversationId: previous?.conversationId }),
-      signal: AbortSignal.any([signal, AbortSignal.timeout(20_000)]),
-    });
-  } catch (cause) {
-    if (signal.aborted) throw cause;
-    throw new ApiError("We could not reach the event service. Check your connection and try again.");
-  }
-  const body: unknown = await response.json().catch(() => null);
-  if (!response.ok) {
-    const error = body && typeof body === "object" && "error" in body && body.error && typeof body.error === "object" ? body.error : null;
-    throw new ApiError(error && "message" in error && typeof error.message === "string" ? error.message : "We could not complete your request. Please try again.", response.status, error && "code" in error && typeof error.code === "string" ? error.code : "API_ERROR");
-  }
-  if (!isAssistantChatResponse(body)) throw new ApiError("The server returned an incomplete response. Please try again.", 502, "INVALID_RESPONSE");
-  return body;
+  const response = await assistantChat(message, previous, signal);
+  if (!isAssistantChatResponse(response)) throw new ApiError("The server returned an incomplete response. Please try again.", 502, "INVALID_RESPONSE");
+  return response;
 }
 
 export function Assistant() {

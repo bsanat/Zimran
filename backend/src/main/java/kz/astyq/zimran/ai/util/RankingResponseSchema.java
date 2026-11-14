@@ -13,7 +13,7 @@ import java.util.Map;
 import java.util.Optional;
 
 /**
- * The JSON schema the model must answer with (OpenAI strict structured output), and its server-side check:
+ * The JSON schema the model must answer with (strict JSON-schema structured output), and its server-side check:
  * <pre>
  * {"summary": string, "recommendations": [{"eventId": string, "matchScore": integer, "reason": string}],
  *  "suggestions": [string]}

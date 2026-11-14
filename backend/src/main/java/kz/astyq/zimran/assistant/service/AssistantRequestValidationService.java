@@ -1,5 +1,6 @@
 package kz.astyq.zimran.assistant.service;
 
+import kz.astyq.zimran.assistant.model.domain.AssistantChatPreferences;
 import kz.astyq.zimran.assistant.model.dto.AssistantRecommendRequest;
 import kz.astyq.zimran.planner.model.domain.ValidatedPlanRequest;
 
@@ -18,4 +19,11 @@ public interface AssistantRequestValidationService {
      * ({@code dateFrom}, {@code dateTo}, ...).
      */
     ValidatedPlanRequest validate(AssistantRecommendRequest request);
+
+    /**
+     * The same planner rules for a chat's merged preferences (planner interests, not category slugs);
+     * {@code message} is the chat's latest message. The first broken rule:
+     * {@code ServiceValidationException(VALIDATION_ERROR)} with {@code details.field} as named by the planner.
+     */
+    ValidatedPlanRequest validate(AssistantChatPreferences preferences, String message);
 }
