@@ -29,8 +29,7 @@ public class PlannerViewController {
 
     @Operation(summary = "Create a plan",
             description = "Up to 5 real events for the guest's interests, dates, time of day and budget, ranked by "
-                    + "AI (rule-based when AI is unavailable). Texts follow the outly-lang cookie or "
-                    + "Accept-Language (ru, en, kk; default en).")
+                    + "AI (rule-based when AI is unavailable). Texts are in English.")
     @ApiResponse(responseCode = "200", description = "The plan")
     @ApiResponse(responseCode = "400", description = "Invalid request; details.field names the field",
             content = @Content(schema = @Schema(implementation = ErrorResponse.class)))

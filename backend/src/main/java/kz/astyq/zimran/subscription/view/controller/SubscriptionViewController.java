@@ -30,7 +30,7 @@ public class SubscriptionViewController {
 
     @Operation(summary = "Get the caller's subscription",
             description = "Status (FREE, DEMO_PREMIUM, PREMIUM_ACTIVE), the Premium plan and uses left in the "
-                    + "current window. Feature labels follow the outly-lang cookie or Accept-Language.",
+                    + "current window. Feature labels are in English.",
             security = @SecurityRequirement(name = OpenApiConfig.GUEST_TOKEN_SCHEME))
     @ApiResponse(responseCode = "200", description = "The subscription")
     @ApiResponse(responseCode = "401", description = "Missing, invalid or expired X-Guest-Token",

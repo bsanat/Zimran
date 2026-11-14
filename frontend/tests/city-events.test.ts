@@ -23,13 +23,12 @@ test("city timeline uses the next local occurrence, skips dark dates and keeps u
   assert.deepEqual(cityListings(events, "latest", "en", now).map(row => row.event.id), ["later", "weekly", "range", "timeslot", "unknown"]);
 });
 
-test("city ordering uses translated categories, venue time zone and preserves dates without inventing a time", () => {
+test("city ordering uses categories, venue time zone and preserves dates without inventing a time", () => {
   const late = new Date("2026-11-19T06:30:00Z"); // Still November 18 in California.
   const events: EventData[] = [
     { ...base, id: "run", timezone: "America/Los_Angeles", category: "running", startAt: "2026-11-19T07:00:00Z" },
     { ...base, id: "art", timezone: "America/Los_Angeles", category: "art", startAt: "2026-11-18" },
   ];
   assert.deepEqual(cityListings(events, "category", "en", late).map(row => row.event.id), ["art", "run"]);
-  assert.deepEqual(cityListings(events, "category", "ru", late).map(row => row.event.id), ["run", "art"]);
   assert.deepEqual(cityListings(events, "earliest", "en", late).map(row => [row.date, row.time]), [["2026-11-18", "23:00"], ["2026-11-18", ""]]);
 });

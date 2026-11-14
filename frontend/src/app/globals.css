@@ -378,16 +378,8 @@ input[aria-invalid="true"], select[aria-invalid="true"], textarea[aria-invalid="
   html { scroll-behavior: auto; }*, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
 }
 
-.language-picker { position: relative; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; gap: 5px; min-width: 44px; min-height: 44px; padding-inline: 4px; border-radius: 8px; font-size: 13px; font-weight: 600; }
-.language-picker select { position: absolute; inset: 0; min-height: 0; height: 100%; opacity: 0; cursor: pointer; }
-.language-picker:hover { color: var(--primary-hover); }
-.language-picker:focus-within { outline: 3px solid var(--primary); outline-offset: 2px; }
 @media (max-width: 767px) {
-  .header-inner { grid-template-columns: auto minmax(0, 1fr) auto auto; column-gap: 8px; }
   .closing-cta > div { flex-basis: 100%; }
   .section-heading { flex-wrap: wrap; }
   .section-heading .text-link { white-space: normal; }
-}
-@media (max-width: 420px) {
-  .language-picker > svg:last-of-type { display: none; }
 }

@@ -1,6 +1,5 @@
 import { randomUUID } from "node:crypto";
 import { CATALOG_EVENTS, catalogCategories, catalogMatchesDate } from "../catalog.ts";
-import { locationMessages } from "../i18n-locations.ts";
 import { addDays, getCityToday, getDateRange, INTERESTS, isDate, TIME_OPTIONS } from "../planner.ts";
 import type { EventData } from "../../types/event.ts";
 import type { Interest, PlannerRequest, PlannerResponse } from "../../types/planner.ts";
@@ -9,33 +8,33 @@ import { ServiceError } from "./serpapi.ts";
 
 const cities = [...new Set(CATALOG_EVENTS.map(event => event.city))];
 const synonyms: Record<Interest, string[]> = {
-  music: ["jazz", "concert", "concerts", "live music", "музыка", "музыку", "джаз", "джаза", "концерт", "концерты", "концертке"],
-  sports: ["sport", "basketball", "football", "спорт", "спорта", "футбол", "баскетбол"],
-  food: ["food", "drinks", "restaurant", "еда", "еду", "еды", "ресторан", "тамақ", "тағам"],
-  art: ["art", "museum", "museums", "gallery", "искусство", "искусства", "музей", "музеи", "галерея", "өнер", "мұражай"],
-  theater: ["theatre", "musical", "театр", "театра", "театрға", "мюзикл"],
-  outdoors: ["outdoor", "nature", "park", "hiking", "природа", "природе", "парк", "табиғат", "серуен"],
-  nightlife: ["club", "clubbing", "nightclub", "клуб", "клубы", "түнгі клуб"],
-  technology: ["tech", "startup", "software", "технологии", "технология", "стартап"],
-  comedy: ["standup", "stand up", "comedy", "комедия", "комедию", "стендап", "әзіл"],
-  gaming: ["games", "board games", "chess", "игры", "настольные", "шахматы", "шахмат", "ойын", "ойындар"],
-  family: ["kids", "children", "family", "семья", "семьей", "семьёй", "семейные", "семейный", "дети", "детьми", "отбасы", "балалар"],
-  books: ["book", "reading", "literature", "книги", "книг", "книга", "кітап", "кітаптар"],
-  ai: ["artificial intelligence", "искусственный интеллект", "жасанды интеллект"],
-  running: ["run", "jogging", "бег", "бегать", "пробежка", "жүгіру"],
-  climate: ["environment", "sustainability", "экология", "климат"],
-  fitness: ["gym", "workout", "фитнес", "тренировка", "жаттығу"],
-  wellness: ["yoga", "meditation", "йога", "медитация", "сауықтыру"],
-  crypto: ["cryptocurrency", "bitcoin", "крипто", "криптовалюта", "биткоин"],
+  music: ["jazz", "concert", "concerts", "live music"],
+  sports: ["sport", "basketball", "football"],
+  food: ["food", "drinks", "restaurant"],
+  art: ["art", "museum", "museums", "gallery"],
+  theater: ["theatre", "musical"],
+  outdoors: ["outdoor", "nature", "park", "hiking"],
+  nightlife: ["club", "clubbing", "nightclub"],
+  technology: ["tech", "startup", "software"],
+  comedy: ["standup", "stand up", "comedy"],
+  gaming: ["games", "board games", "chess"],
+  family: ["kids", "children", "family"],
+  books: ["book", "reading", "literature"],
+  ai: ["artificial intelligence"],
+  running: ["run", "jogging"],
+  climate: ["environment", "sustainability"],
+  fitness: ["gym", "workout"],
+  wellness: ["yoga", "meditation"],
+  crypto: ["cryptocurrency", "bitcoin"],
 };
 const weekdays = [
-  ["sunday", "sun", "воскресенье", "воскресенья", "жексенбі", "жексенбіде"],
-  ["monday", "mon", "понедельник", "дүйсенбі", "дүйсенбіде"],
-  ["tuesday", "tue", "вторник", "сейсенбі", "сейсенбіде"],
-  ["wednesday", "wed", "среда", "среду", "сәрсенбі", "сәрсенбіде"],
-  ["thursday", "thu", "четверг", "бейсенбі", "бейсенбіде"],
-  ["friday", "fri", "пятница", "пятницу", "жұма", "жұмада"],
-  ["saturday", "sat", "суббота", "субботу", "сенбі", "сенбіде"],
+  ["sunday", "sun"],
+  ["monday", "mon"],
+  ["tuesday", "tue"],
+  ["wednesday", "wed"],
+  ["thursday", "thu"],
+  ["friday", "fri"],
+  ["saturday", "sat"],
 ];
 
 function normalize(value: string) { return value.toLocaleLowerCase("en-US").replace(/[‐‑–—-]/g, " ").replace(/\s+/g, " ").trim(); }
@@ -55,10 +54,8 @@ export function parseAssistant(value: unknown, now = new Date()) {
   const message = normalize(raw);
   const clarifications: string[] = [];
   const detected: Partial<PlannerRequest> = { notes: raw.trim(), timePreference: "any" };
-  const cityMatches = cities.filter(city => {
-    const translated = locationMessages[city as keyof typeof locationMessages] ?? [];
-    return [city, ...translated, ...(city === "New York" ? ["NYC", "New York City", "Ньюйорк", "Нью-Йорке", "Нью-Йоркке", "Нью-Йоркте"] : [])].some(term => contains(message, term));
-  });
+  const cityMatches = cities.filter(city =>
+    [city, ...(city === "New York" ? ["NYC", "New York City"] : [])].some(term => contains(message, term)));
   if (cityMatches.length === 1) detected.city = cityMatches[0];
   else clarifications.push(cityMatches.length ? "Choose one city for this search." : "Which city? Choose a city from the verified catalog.");
 
@@ -71,18 +68,18 @@ export function parseAssistant(value: unknown, now = new Date()) {
   const explicitDates = [...raw.matchAll(/\b\d{4}-\d{2}-\d{2}\b/g)].map(match => match[0]);
   const relativeDates: { startDate: string; endDate: string }[] = [];
   const today = getCityToday(now);
-  if (["today", "tonight", "сегодня", "бүгін"].some(term => contains(message, term))) relativeDates.push({ startDate: today, endDate: today });
-  if (["tomorrow", "завтра", "ертең"].some(term => contains(message, term))) relativeDates.push({ startDate: addDays(today, 1), endDate: addDays(today, 1) });
-  if (["weekend", "выходные", "выходных", "уикенд", "демалыс күндері", "осы демалыс"].some(term => contains(message, term))) {
+  if (["today", "tonight"].some(term => contains(message, term))) relativeDates.push({ startDate: today, endDate: today });
+  if (["tomorrow"].some(term => contains(message, term))) relativeDates.push({ startDate: addDays(today, 1), endDate: addDays(today, 1) });
+  if (["weekend"].some(term => contains(message, term))) {
     const weekend = getDateRange("weekend", "", now);
-    const next = ["next weekend", "следующие выходные", "келесі демалыс"].some(term => contains(message, term));
+    const next = ["next weekend"].some(term => contains(message, term));
     relativeDates.push(next ? { startDate: addDays(weekend.startDate, 7), endDate: addDays(weekend.endDate, 7) } : weekend);
   }
   weekdays.forEach((terms, index) => {
     if (!terms.some(term => contains(message, term))) return;
     const weekday = new Date(`${today}T12:00:00Z`).getUTCDay();
     let distance = (index - weekday + 7) % 7;
-    if (!distance && ["next", "следующий", "следующую", "келесі"].some(term => contains(message, term))) distance = 7;
+    if (!distance && ["next"].some(term => contains(message, term))) distance = 7;
     const date = addDays(today, distance);
     relativeDates.push({ startDate: date, endDate: date });
   });
@@ -93,17 +90,17 @@ export function parseAssistant(value: unknown, now = new Date()) {
   else clarifications.push(explicitDates.length || relativeDates.length ? "Your dates differ. Confirm the date range below." : "When would you like to go? Set a date or date range below.");
   if (detected.startDate && detected.startDate < today) clarifications.push("Choose today or a future date in New York.");
 
-  const amounts = [...raw.matchAll(/(?:-\s*)?\$\s*(-?\d+(?:[.,]\d{1,2})?)|(?:under|up to|budget(?: of)?|до|бюджет(?:ом)?)\s*\$?\s*(-?\d+(?:[.,]\d{1,2})?)|(-?\d+(?:[.,]\d{1,2})?)\s*(?:dollars?|usd|доллар(?:ов|а|дан)?)(?!\p{L})/giu)].map(match => Number((match[1] ?? match[2] ?? match[3]).replace(",", ".")) * (/^-\s*\$/.test(match[0]) ? -1 : 1));
-  const free = ["free", "бесплатно", "бесплатные", "бесплатный", "тегін"].some(term => contains(message, term));
+  const amounts = [...raw.matchAll(/(?:-\s*)?\$\s*(-?\d+(?:[.,]\d{1,2})?)|(?:under|up to|budget(?: of)?)\s*\$?\s*(-?\d+(?:[.,]\d{1,2})?)|(-?\d+(?:[.,]\d{1,2})?)\s*(?:dollars?|usd)(?!\p{L})/giu)].map(match => Number((match[1] ?? match[2] ?? match[3]).replace(",", ".")) * (/^-\s*\$/.test(match[0]) ? -1 : 1));
+  const free = ["free"].some(term => contains(message, term));
   const budgets = [...new Set([...amounts, ...(free ? [0] : [])])];
   if (budgets.length === 1 && budgets[0] >= 0) detected.budgetMax = budgets[0];
   else if (budgets.length) clarifications.push("Choose one maximum budget in USD.");
   if (/[€£₸₽]/u.test(raw)) clarifications.push("Choose one maximum budget in USD.");
 
   const timeMatches = [
-    { value: "morning" as const, terms: ["morning", "утро", "утром", "таңертең"] },
-    { value: "afternoon" as const, terms: ["afternoon", "днём", "днем", "түстен кейін"] },
-    { value: "evening" as const, terms: ["evening", "tonight", "вечер", "вечером", "кешке", "кешкі"] },
+    { value: "morning" as const, terms: ["morning"] },
+    { value: "afternoon" as const, terms: ["afternoon"] },
+    { value: "evening" as const, terms: ["evening", "tonight"] },
   ].filter(option => option.terms.some(term => contains(message, term)));
   if (timeMatches.length === 1) detected.timePreference = timeMatches[0].value;
   else if (timeMatches.length > 1) clarifications.push("Choose one time of day, or keep any time.");
@@ -195,25 +192,25 @@ export function chatAssistant(value: unknown, now = new Date()): AssistantChatRe
     else delete preferences[field];
   }
 
-  const unsupportedCity = has(["London", "Лондон", "Лондоне", "Лондонда", "Paris", "Париж", "Париже", "Парижде", "Almaty", "Алматы", "Алматыда"]);
-  const unknownCityChange = !parsed.detected.city && (has(["another city", "different city", "другой город", "басқа қала"]) || /(?:\bcity|город|қала)\s*[:=]\s*\p{L}/u.test(message) || /\bin\s+(?!the\b|a\b|an\b|\d)(\p{L}+)/u.test(message) && !has(["morning", "afternoon", "evening", "weekend"]));
+  const unsupportedCity = has(["London", "Paris", "Almaty"]);
+  const unknownCityChange = !parsed.detected.city && (has(["another city", "different city"]) || /\bcity\s*[:=]\s*\p{L}/u.test(message) || /\bin\s+(?!the\b|a\b|an\b|\d)(\p{L}+)/u.test(message) && !has(["morning", "afternoon", "evening", "weekend"]));
   if (unsupportedCity || unknownCityChange || parsed.clarifications.includes("Choose one city for this search.")) clear("city");
   else if (parsed.detected.city) { preferences.city = parsed.detected.city; pending.delete("city"); changed = true; }
   if (parsed.detected.interests?.length) { preferences.interests = parsed.detected.interests; pending.delete("interests"); changed = true; }
 
   const ambiguousDates = parsed.clarifications.includes("Your dates differ. Confirm the date range below.") || parsed.clarifications.includes("Choose today or a future date in New York.");
-  const unknownDateChange = !parsed.detected.startDate && has(["any date", "any day", "next week", "next month", "любой день", "любая дата", "следующей неделе", "следующем месяце", "кез келген күн", "келесі апта", "келесі ай"]);
+  const unknownDateChange = !parsed.detected.startDate && has(["any date", "any day", "next week", "next month"]);
   if (ambiguousDates || unknownDateChange) clear("dates");
   else if (parsed.detected.startDate && parsed.detected.endDate) {
     preferences.startDate = parsed.detected.startDate; preferences.endDate = parsed.detected.endDate; pending.delete("dates"); changed = true;
   }
   if (preferences.startDate && preferences.startDate < getCityToday(now) || preferences.endDate && preferences.endDate < getCityToday(now)) clear("dates");
-  const anyBudget = has(["any budget", "any price", "no budget limit", "unlimited budget", "любой бюджет", "без ограничения бюджета", "без лимита", "кез келген бюджет", "бюджет шектеусіз", "шектеусіз бюджет"]);
+  const anyBudget = has(["any budget", "any price", "no budget limit", "unlimited budget"]);
   if (parsed.clarifications.includes("Choose one maximum budget in USD.") || anyBudget && parsed.detected.budgetMax !== undefined) clear("budgetMax");
   else if (anyBudget) { delete preferences.budgetMax; pending.delete("budgetMax"); changed = true; }
   else if (parsed.detected.budgetMax !== undefined) { preferences.budgetMax = parsed.detected.budgetMax; pending.delete("budgetMax"); changed = true; }
 
-  const anyTime = has(["any time", "anytime", "time doesn't matter", "любое время", "в любое время", "кез келген уақытта", "кез келген уақыт"]);
+  const anyTime = has(["any time", "anytime", "time doesn't matter"]);
   const specificTime = parsed.detected.timePreference !== undefined && parsed.detected.timePreference !== "any";
   if (parsed.clarifications.includes("Choose one time of day, or keep any time.") || anyTime && specificTime) clear("timePreference");
   else if (anyTime || specificTime) { preferences.timePreference = parsed.detected.timePreference; pending.delete("timePreference"); changed = true; }
@@ -224,7 +221,7 @@ export function chatAssistant(value: unknown, now = new Date()): AssistantChatRe
   if (!preferences.startDate || !preferences.endDate) pending.add("dates");
   const pendingFields = fields.filter(field => pending.has(field));
   const clarifications = pendingFields.map(field => chatQuestions[field]);
-  if (!changed && !clarifications.length && !has(["show events", "find events", "find my plan", "show me", "найди события", "покажи события", "іс шараларды көрсет", "жоспар тап"])) {
+  if (!changed && !clarifications.length && !has(["show events", "find events", "find my plan", "show me"])) {
     clarifications.push("Tell me what to change: city, interests, date, budget or time of day.");
   }
   return {

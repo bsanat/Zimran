@@ -168,7 +168,7 @@ test("assistant chat sends the previous preferences, asks while fields are pendi
   assert.equal(bodies[2].conversationId, "3f2b8c1e-1d2a-4c3b-9a8e-123456789abc", "later turns continue the conversation");
 });
 
-test("alert categories come from GET /api/meta, cached per language and retried after a failure", async t => {
+test("alert categories come from GET /api/meta, cached and retried after a failure", async t => {
   let calls = 0;
   let fail = true;
   t.mock.method(globalThis, "fetch", async (url: string) => {
@@ -176,21 +176,19 @@ test("alert categories come from GET /api/meta, cached per language and retried 
     assert.ok(url.endsWith("/api/meta"));
     if (fail) { fail = false; return Response.json({ error: { code: "UPSTREAM_UNAVAILABLE", message: "Down" } }, { status: 503 }); }
     return Response.json({ categories: [
-      { id: "tech", label: "Технологии", interests: ["technology", "ai", "crypto"] },
-      { id: "other", label: "Другое", interests: ["gaming", "wellness", "unknown-interest"] },
+      { id: "tech", label: "Technology", interests: ["technology", "ai", "crypto"] },
+      { id: "other", label: "Other", interests: ["gaming", "wellness", "unknown-interest"] },
     ] });
   });
   const client = await import(`../src/lib/backend-api.ts?meta=${Date.now()}`);
-  await assert.rejects(client.getAlertCategories("ru"), /Down/);
-  const categories = await client.getAlertCategories("ru");
+  await assert.rejects(client.getAlertCategories("en"), /Down/);
+  const categories = await client.getAlertCategories("en");
   assert.deepEqual(categories.map((category: { id: string }) => category.id), ["tech", "other"]);
   assert.deepEqual(categories[1].interests, ["gaming", "wellness"], "unknown interests are dropped");
   assert.equal(client.categoryIcon(categories[0]), "technology");
   assert.equal(client.categoryIcon(undefined), "bell");
-  await client.getAlertCategories("ru");
-  assert.equal(calls, 2, "one failed and one successful request; the second call is cached");
   await client.getAlertCategories("en");
-  assert.equal(calls, 3, "another language is requested separately");
+  assert.equal(calls, 2, "one failed and one successful request; the second call is cached");
 });
 
 test("buddy merges the open feed with my posts and requests and maps catalog event ids", async t => {

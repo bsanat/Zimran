@@ -25,7 +25,7 @@ public final class RankingPromptBuilder {
     static final int VENUE_MAX = 150;
     static final int DESCRIPTION_MAX = 400;
 
-    private static final Map<String, String> LANGUAGES = Map.of("en", "English", "ru", "Russian", "kk", "Kazakh");
+    private static final Map<String, String> LANGUAGES = Map.of("en", "English");
 
     static final String SYSTEM_PROMPT = """
             You are a leisure planner. You receive one JSON object with the guest's preferences ("preferences") and \

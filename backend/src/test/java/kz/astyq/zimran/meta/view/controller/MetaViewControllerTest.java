@@ -40,10 +40,10 @@ class MetaViewControllerTest {
     }
 
     @Test
-    @DisplayName("GET /api/meta: labels follow the request language")
-    void russian() throws Exception {
+    @DisplayName("GET /api/meta: labels stay English whatever Accept-Language asks for")
+    void englishOnly() throws Exception {
         mockMvc.perform(get("/api/meta").header("Accept-Language", "ru"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.categories[0].label").value("Музыка"));
+                .andExpect(jsonPath("$.categories[0].label").value("Music"));
     }
 }

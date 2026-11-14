@@ -1,10 +1,8 @@
 package kz.astyq.zimran.core.configuration;
 
-import kz.astyq.zimran.core.model.AppSettings;
 import kz.astyq.zimran.core.service.ScopeActivityRecorder;
 import kz.astyq.zimran.core.web.CaseInsensitiveEnumConverterFactory;
 import kz.astyq.zimran.core.web.CurrentScopeArgumentResolver;
-import kz.astyq.zimran.core.web.LanguageLocaleResolver;
 import kz.astyq.zimran.core.web.RateLimitInterceptor;
 import kz.astyq.zimran.core.web.RequestIdFilter;
 import lombok.RequiredArgsConstructor;
@@ -18,9 +16,11 @@ import org.springframework.web.servlet.LocaleResolver;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+import org.springframework.web.servlet.i18n.FixedLocaleResolver;
 
 import java.time.Clock;
 import java.util.List;
+import java.util.Locale;
 
 @Configuration
 @RequiredArgsConstructor
@@ -28,7 +28,6 @@ public class WebConfig implements WebMvcConfigurer {
 
     private final CorsProperties corsProperties;
     private final WebProperties webProperties;
-    private final AppSettings appSettings;
     private final ObjectProvider<ScopeActivityRecorder> scopeActivityRecorders;
 
     @Override
@@ -61,10 +60,11 @@ public class WebConfig implements WebMvcConfigurer {
     }
 
     /**
-     * Bean name {@code localeResolver} replaces Spring's default (Accept-Language only).
+     * Bean name {@code localeResolver} replaces Spring's default: the API answers in English whatever the
+     * request's cookies or Accept-Language say.
      */
     @Bean
     public LocaleResolver localeResolver() {
-        return new LanguageLocaleResolver(AppSettings.SUPPORTED_LOCALES, appSettings.getDefaultLocale());
+        return new FixedLocaleResolver(Locale.ENGLISH);
     }
 }
