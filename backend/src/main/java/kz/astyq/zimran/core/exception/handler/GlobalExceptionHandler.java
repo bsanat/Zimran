@@ -1,11 +1,11 @@
 package kz.astyq.zimran.core.exception.handler;
 
-import kz.astyq.zimran.core.exception.ApiException;
-import kz.astyq.zimran.core.exception.RateLimitedException;
+import kz.astyq.zimran.core.exception.ServiceValidationException;
 import kz.astyq.zimran.core.exception.dto.ErrorBody;
 import kz.astyq.zimran.core.exception.dto.ErrorResponse;
 import kz.astyq.zimran.core.i18n.MessageService;
 import kz.astyq.zimran.core.util.ErrorCode;
+import kz.astyq.zimran.core.util.MessageCode;
 import kz.astyq.zimran.core.web.RequestIdFilter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -17,6 +17,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.util.StringUtils;
+import org.springframework.validation.FieldError;
 import org.springframework.validation.ObjectError;
 import org.springframework.validation.method.ParameterErrors;
 import org.springframework.validation.method.ParameterValidationResult;
@@ -47,30 +48,25 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class GlobalExceptionHandler {
 
-    static final String KEY_MALFORMED_BODY = "error.validation.malformed-body";
-    static final String KEY_TYPE_MISMATCH = "error.validation.type-mismatch";
-    static final String KEY_MISSING_PARAMETER = "error.validation.missing-parameter";
-    static final String KEY_METHOD_NOT_ALLOWED = "error.validation.method-not-allowed";
-
     private static final Comparator<Map<String, Object>> BY_FIELD_THEN_MESSAGE =
             Comparator.comparing((Map<String, Object> m) -> String.valueOf(m.get("field")))
                     .thenComparing(m -> String.valueOf(m.get("message")));
 
     private final MessageService messageService;
 
-    @ExceptionHandler(ApiException.class)
-    public ResponseEntity<ErrorResponse> handleApi(ApiException e) {
-        ErrorCode code = e.getCode();
+    @ExceptionHandler(ServiceValidationException.class)
+    public ResponseEntity<ErrorResponse> handleService(ServiceValidationException e) {
+        ErrorCode code = e.getErrorCode();
         if (code.getStatus().is5xxServerError()) {
-            log.warn("{}: {}", code, e.getMessageKey(), e.getCause());
+            log.warn("{}: {}", code, e.getMessageCode(), e.getCause());
         } else {
-            log.debug("{}: {}", code, e.getMessageKey());
+            log.debug("{}: {}", code, e.getMessageCode());
         }
         HttpHeaders headers = new HttpHeaders();
-        if (e instanceof RateLimitedException rateLimited) {
-            headers.set(HttpHeaders.RETRY_AFTER, String.valueOf(rateLimited.getRetryAfterSeconds()));
+        if (e.getRetryAfterSeconds() != null) {
+            headers.set(HttpHeaders.RETRY_AFTER, String.valueOf(e.getRetryAfterSeconds()));
         }
-        return build(code.getStatus(), code, message(e.getMessageKey(), e.getArgs()), e.getDetails(), headers);
+        return build(code.getStatus(), code, message(e.getMessageCode(), e.getArguments()), e.getDetails(), headers);
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
@@ -104,24 +100,23 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleNotReadable(HttpMessageNotReadableException e) {
         // The parser message may echo request content; keep it in debug logs only.
         log.debug("Unreadable request body: {}", e.getMessage());
-        return validation(message(KEY_MALFORMED_BODY), Map.of());
+        return malformed(Map.of());
     }
 
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
     public ResponseEntity<ErrorResponse> handleTypeMismatch(MethodArgumentTypeMismatchException e) {
-        return validation(message(KEY_TYPE_MISMATCH, e.getName()), Map.of("field", e.getName()));
+        return malformed(singleField(e.getName()));
     }
 
     @ExceptionHandler(MissingServletRequestParameterException.class)
     public ResponseEntity<ErrorResponse> handleMissingParameter(MissingServletRequestParameterException e) {
-        return validation(message(KEY_MISSING_PARAMETER, e.getParameterName()),
-                Map.of("field", e.getParameterName()));
+        return malformed(singleField(e.getParameterName()));
     }
 
     @ExceptionHandler(NoResourceFoundException.class)
     public ResponseEntity<ErrorResponse> handleNoResource(NoResourceFoundException e) {
         ErrorCode code = ErrorCode.NOT_FOUND;
-        return build(code.getStatus(), code, message(code.getDefaultMessageKey()), Map.of(), new HttpHeaders());
+        return build(code.getStatus(), code, message(MessageCode.NOT_FOUND), Map.of(), new HttpHeaders());
     }
 
     @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
@@ -131,22 +126,22 @@ public class GlobalExceptionHandler {
             headers.setAllow(e.getSupportedHttpMethods());
         }
         return build(HttpStatus.METHOD_NOT_ALLOWED, ErrorCode.VALIDATION_ERROR,
-                message(KEY_METHOD_NOT_ALLOWED, e.getMethod()), Map.of(), headers);
+                message(MessageCode.METHOD_NOT_ALLOWED, e.getMethod()), Map.of(), headers);
     }
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleUnexpected(Exception e) {
-        // Other Spring MVC exceptions (415, 406, ResponseStatusException, ...) keep their status.
+        // Other Spring MVC client errors (415, 406, ...) keep their 4xx status instead of becoming 500.
         if (e instanceof org.springframework.web.ErrorResponse springError
-                && !springError.getStatusCode().is5xxServerError()) {
+                && springError.getStatusCode().is4xxClientError()) {
             HttpStatusCode status = springError.getStatusCode();
-            ErrorCode code = ErrorCode.fromStatus(status);
             log.debug("{} -> {}", e.getClass().getSimpleName(), status);
-            return build(status, code, message(code.getDefaultMessageKey()), Map.of(), springError.getHeaders());
+            return build(status, ErrorCode.fromStatus(status), message(MessageCode.MALFORMED_REQUEST), Map.of(),
+                    springError.getHeaders());
         }
         log.error("Unexpected error", e);
         ErrorCode code = ErrorCode.INTERNAL_ERROR;
-        return build(code.getStatus(), code, message(code.getDefaultMessageKey()), Map.of(), new HttpHeaders());
+        return build(code.getStatus(), code, message(MessageCode.INTERNAL_ERROR), Map.of(), new HttpHeaders());
     }
 
     private ResponseEntity<ErrorResponse> validationFailed(List<Map<String, Object>> fields) {
@@ -155,12 +150,20 @@ public class GlobalExceptionHandler {
             details.put("field", fields.getFirst().get("field"));
             details.put("fields", fields);
         }
-        return validation(message(ErrorCode.VALIDATION_ERROR.getDefaultMessageKey()), details);
+        ErrorCode code = ErrorCode.VALIDATION_ERROR;
+        return build(code.getStatus(), code, message(MessageCode.VALIDATION_ERROR), details, new HttpHeaders());
     }
 
-    private ResponseEntity<ErrorResponse> validation(String message, Map<String, Object> details) {
+    private ResponseEntity<ErrorResponse> malformed(Map<String, Object> details) {
         ErrorCode code = ErrorCode.VALIDATION_ERROR;
-        return build(code.getStatus(), code, message, details, new HttpHeaders());
+        return build(code.getStatus(), code, message(MessageCode.MALFORMED_REQUEST), details, new HttpHeaders());
+    }
+
+    private Map<String, Object> singleField(String name) {
+        Map<String, Object> details = new LinkedHashMap<>();
+        details.put("field", name);
+        details.put("fields", List.of(field(name, null)));
+        return details;
     }
 
     private ResponseEntity<ErrorResponse> build(HttpStatusCode status, ErrorCode code, String message,
@@ -177,18 +180,26 @@ public class GlobalExceptionHandler {
                 .body(ErrorResponse.builder().error(body).build());
     }
 
-    private String message(String key, Object... args) {
-        return messageService.getMessage(key, args);
+    private String message(String code, Object... args) {
+        return messageService.getMessage(code, args);
     }
 
-    private static Map<String, Object> fieldError(String field, ObjectError error) {
-        return field(field, error.getDefaultMessage());
+    /**
+     * A conversion failure (e.g. an unknown enum value) gets the generic text: its default message names
+     * Java types and echoes the input.
+     */
+    private Map<String, Object> fieldError(String field, ObjectError error) {
+        boolean bindingFailure = error instanceof FieldError fieldError && fieldError.isBindingFailure();
+        return field(field, bindingFailure ? null : error.getDefaultMessage());
     }
 
-    private static Map<String, Object> field(String field, String message) {
+    /**
+     * One {@code {field, message}} entry; falls back to the generic "invalid value" text.
+     */
+    private Map<String, Object> field(String field, String message) {
         Map<String, Object> entry = new LinkedHashMap<>();
         entry.put("field", field);
-        entry.put("message", message);
+        entry.put("message", StringUtils.hasText(message) ? message : message(MessageCode.FIELD_INVALID));
         return entry;
     }
 

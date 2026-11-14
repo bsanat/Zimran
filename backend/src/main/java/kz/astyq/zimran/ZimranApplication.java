@@ -1,6 +1,9 @@
 package kz.astyq.zimran;
 
+import kz.astyq.zimran.core.configuration.AppCacheProperties;
+import kz.astyq.zimran.core.configuration.CityProperties;
 import kz.astyq.zimran.core.configuration.CorsProperties;
+import kz.astyq.zimran.core.configuration.InterestMappingProperties;
 import kz.astyq.zimran.core.configuration.OpenAiProperties;
 import kz.astyq.zimran.core.configuration.PlannerProperties;
 import kz.astyq.zimran.core.configuration.TicketmasterProperties;
@@ -12,8 +15,11 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 @SpringBootApplication
 @EnableConfigurationProperties({
 		AppSettings.class,
+		AppCacheProperties.class,
+		CityProperties.class,
 		CorsProperties.class,
 		TicketmasterProperties.class,
+		InterestMappingProperties.class,
 		OpenAiProperties.class,
 		PlannerProperties.class
 })

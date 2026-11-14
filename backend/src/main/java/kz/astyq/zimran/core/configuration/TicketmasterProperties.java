@@ -25,7 +25,7 @@ public class TicketmasterProperties {
 
     @NotBlank
     @URL
-    private String baseUrl = "https://app.ticketmaster.com/discovery/v2";
+    private String baseUrl = "https://app.ticketmaster.com";
 
     private String apiKey;
 
@@ -40,6 +40,13 @@ public class TicketmasterProperties {
     @Min(1)
     @Max(200)
     private int pageSize = 100;
+
+    /**
+     * Max result pages fetched for one search (Discovery API caps {@code page * size} below 1000).
+     */
+    @Min(1)
+    @Max(10)
+    private int maxPagesPerSearch = 2;
 
     public boolean hasApiKey() {
         return StringUtils.hasText(apiKey);

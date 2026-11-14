@@ -22,14 +22,62 @@ application:
   default-locale: en
 
 app:
+  city:
+    default-id: nyc
+    supported:
+      - id: nyc
+        name: New York
+        state-code: NY
+        country-code: US
+        zone: America/New_York
+  cache:
+    search-ttl: ${CACHE_SEARCH_TTL:10m}
+    search-max-size: 500
+    stale-ttl: 6h
+    stale-max-size: 500
+    by-id-ttl: 30m
+    by-id-max-size: 5000
   cors:
     allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:3000}
   ticketmaster:
-    base-url: ${TICKETMASTER_BASE_URL:https://app.ticketmaster.com/discovery/v2}
+    base-url: ${TICKETMASTER_BASE_URL:https://app.ticketmaster.com}
     api-key: ${TICKETMASTER_API_KEY:}
     connect-timeout: 3s
     read-timeout: 10s
     page-size: 100
+    max-pages-per-search: 2
+    # Interest -> Ticketmaster classification rules (segment / genre / subGenre; omitted = any).
+    # Initial values: verify the names against GET /discovery/v2/classifications.json before relying
+    # on them. An interest with no rules has no coverage and returns no events (nothing is made up).
+    interest-mapping:
+      music:
+        - segment: Music
+      sports:
+        - segment: Sports
+      theater:
+        - { segment: "Arts & Theatre", genre: Theatre }
+        - { segment: "Arts & Theatre", genre: Musical }
+        - { segment: "Arts & Theatre", genre: Opera }
+        - { segment: "Arts & Theatre", genre: Dance }
+      art:
+        - { segment: "Arts & Theatre", genre: "Fine Art" }
+        - { segment: "Arts & Theatre", genre: Multimedia }
+        - { segment: "Arts & Theatre", genre: Cultural }
+      comedy:
+        - genre: Comedy
+      food:
+        - genre: "Food & Drink"
+      nightlife:
+        - sub-genre: Club
+        - genre: "Dance/Electronic"
+      outdoors:
+        - genre: "Fairs & Festivals"
+        - genre: Outdoor
+      technology:
+        - genre: "Lecture/Seminar"
+      gaming:
+        - genre: Esports
+        - sub-genre: Gaming
   openai:
     base-url: ${OPENAI_BASE_URL:https://api.openai.com/v1}
     api-key: ${OPENAI_API_KEY:}
@@ -41,6 +89,7 @@ app:
     max-candidates: 30
     max-recommendations: 5
     max-range-days: 7
+    include-unknown-price: true
 
 logging:
   pattern:
