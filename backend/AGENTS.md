@@ -33,8 +33,15 @@ Non-negotiable rules:
 - JSON: camelCase, nulls included for optional Event fields (frontend expects them).
 
 Coding conventions:
-- Constructor injection (@RequiredArgsConstructor), records for DTOs, MapStruct for
-  entity<->DTO, @ConfigurationProperties records for config (validated with @Validated).
+- Constructor injection (@RequiredArgsConstructor).
+- NO Java records anywhere. DTOs (API request/response, Ticketmaster/OpenAI payloads)
+  are Lombok classes in the style of the existing ExceptionResponse:
+  @Getter @Setter @Builder @NoArgsConstructor @AllArgsConstructor.
+  Immutable internal value objects (EventId, Event, Candidate...) use @Value @Builder
+  (add @Jacksonized if Jackson must deserialize them).
+  Wherever a prompt writes Name(field, field), it means a Lombok class with those fields.
+- MapStruct for, MapStruct for
+  entity<->DTO, @ConfigurationProperties Lombok classes for config (@Getter @Setter, like AppSettings) (validated with @Validated).
 - Use RestClient for HTTP calls (no WebFlux). Timeouts on every outbound call.
 - Every new table => Flyway migration in src/main/resources/db/migration (V<n>__name.sql).
 - Tests: JUnit 5 + AssertJ; WireMock for Ticketmaster/OpenAI; Testcontainers Postgres

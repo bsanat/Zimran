@@ -165,11 +165,16 @@ public class GlobalExceptionHandler {
 
     private ResponseEntity<ErrorResponse> build(HttpStatusCode status, ErrorCode code, String message,
                                                 Map<String, Object> details, HttpHeaders headers) {
-        ErrorBody body = new ErrorBody(code.name(), message, details, RequestIdFilter.currentRequestId());
+        ErrorBody body = ErrorBody.builder()
+                .code(code.name())
+                .message(message)
+                .details(details == null || details.isEmpty() ? Map.of() : details)
+                .requestId(RequestIdFilter.currentRequestId())
+                .build();
         return ResponseEntity.status(status)
                 .headers(headers)
                 .contentType(MediaType.APPLICATION_JSON)
-                .body(new ErrorResponse(body));
+                .body(ErrorResponse.builder().error(body).build());
     }
 
     private String message(String key, Object... args) {

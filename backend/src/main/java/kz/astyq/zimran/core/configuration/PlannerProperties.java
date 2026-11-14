@@ -2,22 +2,34 @@ package kz.astyq.zimran.core.configuration;
 
 import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.Positive;
+import lombok.Getter;
+import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.boot.context.properties.bind.DefaultValue;
 import org.springframework.validation.annotation.Validated;
 
-/**
- * @param maxCandidates      max events sent to the AI for ranking
- * @param maxRecommendations max events returned to the client
- * @param maxRangeDays       max length of the requested date range, in days
- */
+@Getter
+@Setter
 @Validated
 @ConfigurationProperties(prefix = "app.planner")
-public record PlannerProperties(
-        @Positive @DefaultValue("30") int maxCandidates,
-        @Positive @DefaultValue("5") int maxRecommendations,
-        @Positive @DefaultValue("7") int maxRangeDays
-) {
+public class PlannerProperties {
+
+    /**
+     * Max events sent to the AI for ranking.
+     */
+    @Positive
+    private int maxCandidates = 30;
+
+    /**
+     * Max events returned to the client.
+     */
+    @Positive
+    private int maxRecommendations = 5;
+
+    /**
+     * Max length of the requested date range, in days.
+     */
+    @Positive
+    private int maxRangeDays = 7;
 
     @AssertTrue(message = "max-recommendations must not exceed max-candidates")
     public boolean isRecommendationsWithinCandidates() {
