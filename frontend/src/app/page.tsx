@@ -33,7 +33,7 @@ export default async function Home() {
     <InterestStrip />
     <section className="container home-discovery" aria-labelledby="city-picks">
       <div className="section-heading">
-        <h2 id="city-picks">{t("Things to do in New York")}</h2>
+        <h2 id="city-picks">{t("Things to do across the USA")}</h2>
         <Link className="text-link" href="/explore">{t("Explore all events")}</Link>
       </div>
       <nav className="home-highlights" aria-label={t("Event categories")}>

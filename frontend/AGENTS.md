@@ -4,8 +4,9 @@
 - Команды: `npm install`, `npm run dev`, `npm run build`, `npm run typecheck`, `npm test` (Node.js 24+ для встроенного запуска TS-тестов).
 - Страницы в `src/app`, UI в `src/components`, состояние планировщика в `src/hooks/usePlanner.ts`.
 - Общий контракт API: `src/types`. HTTP-клиент: `src/lib/api.ts`. Правила дат, цены и валидации: `src/lib/planner.ts`.
+- Проверенный каталог: `src/data/catalog.json`, единые фильтры/география — `src/lib/catalog.ts`, фото — `public/catalog`. Добавляйте только проверенные реальные записи с официальной ссылкой, источником фото и `lastVerifiedAt`; demo-записи не используются.
 - Frontend не генерирует события. Встроенный серверный SerpApi-адаптер: `src/lib/server/serpapi.ts`, маршруты — `src/app/api`; ключ — `SERPAPI_KEY` или `API_KEY`. Внешний Backend/Ticketmaster/OpenAI подключается через `API_PROXY_ORIGIN` с приоритетом над встроенным `/api`.
-- Все даты выбора относятся к America/New_York. В POST /api/plan используйте `startDate`/`endDate` включительно. Детали выводите в timezone события.
+- Planner использует America/New_York и POST /api/plan с `startDate`/`endDate` включительно. Даты каталога и детали относятся к timezone события; учитывайте occurrenceDates, availableDateRanges, excludedDates и ограничения регулярных программ. Не придумывайте время для date-only записей.
 - Неизвестная цена не равна бесплатной. Не храните API-секреты в NEXT_PUBLIC_*.
 - P2 Auth отложен; гостевые страницы не требуют входа. Не имитируйте авторизацию.
 - Не публикуйте, не пушьте и не разворачивайте проект без разрешения пользователя.

@@ -7,6 +7,7 @@ export interface EventData {
   title: string;
   category: string;
   city: string;
+  state?: string;
   startAt: string | null;
   dateText?: string | null;
   timezone: string;
@@ -22,6 +23,17 @@ export interface EventData {
   sourceUrl: string | null;
   status: EventStatus;
   isMajor?: boolean;
+  sourceName?: string;
+  lastVerifiedAt?: string;
+  imageIsIllustration?: boolean;
+  isRecurring?: boolean;
+  startDate?: string | null;
+  endDate?: string | null;
+  recurrenceDays?: number[];
+  recurrenceMonths?: number[];
+  occurrenceDates?: string[];
+  excludedDates?: string[];
+  availableDateRanges?: [string, string][];
 }
 
 export interface EventsResponse {
