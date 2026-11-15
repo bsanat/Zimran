@@ -20,6 +20,13 @@ public class DemoAccessServiceImpl implements DemoAccessService {
 
     @Override
     public void requireEnabled() {
+        if (!demoProperties.isEnabled() && !demoProperties.isPremiumEnabled()) {
+            throw new ServiceValidationException(ErrorCode.NOT_FOUND, MessageCode.DEMO_DISABLED);
+        }
+    }
+
+    @Override
+    public void requireEventsEnabled() {
         if (!demoProperties.isEnabled()) {
             throw new ServiceValidationException(ErrorCode.NOT_FOUND, MessageCode.DEMO_DISABLED);
         }

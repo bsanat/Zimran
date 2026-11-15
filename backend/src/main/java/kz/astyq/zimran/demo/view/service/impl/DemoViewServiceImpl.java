@@ -49,6 +49,7 @@ public class DemoViewServiceImpl implements DemoViewService {
 
     @Override
     public EventDetailsViewResponse createEvent(DemoEventCreateRequest request, RequestScope scope) {
+        demoAccessService.requireEventsEnabled();
         demoAccessService.requireDemoPremium(scope);
         rateLimitService.consume(RateLimitAction.DEMO_EVENT, scope);
         Event event = demoEventService.addSample(demoEventDraftService.resolve(request));

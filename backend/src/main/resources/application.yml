@@ -410,6 +410,8 @@ app:
   demo:
     # Also seeds fictional NYC sample events (provider "demo", isDemo = true) at startup.
     enabled: ${DEMO_ENABLED:false}
+    # Premium access without seeding or exposing fictional events.
+    premium-enabled: ${DEMO_PREMIUM_ENABLED:false}
   ingestion:
     # Scheduled ingestion of every supported city into the events table (Spring cron, 6 fields).
     enabled: ${EVENT_INGESTION_ENABLED:true}

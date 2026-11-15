@@ -13,4 +13,5 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 public class DemoProperties {
 
     private boolean enabled = false;
+    private boolean premiumEnabled = false;
 }
