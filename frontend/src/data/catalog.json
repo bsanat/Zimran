@@ -3617,7 +3617,7 @@
       "sourceEventId": "ny-dizzys-jazz",
       "status": "scheduled",
       "isMajor": false,
-      "imageSourceUrl": "https://jazz.org/wp-content/uploads/2023/07/dizzysclub-home.png",
+      "imageSourceUrl": "https://jazz.org/wp-content/uploads/2023/09/dizzys.jpg",
       "imageIsIllustration": true,
       "lastVerifiedAt": "2026-11-14",
       "evidenceUrl": "https://jazz.org/dizzys/",
@@ -3632,7 +3632,7 @@
         5,
         6
       ],
-      "imageUrl": "/catalog/ny-dizzys-jazz.png"
+      "imageUrl": "/catalog/ny-dizzys-jazz.jpg"
     },
     {
       "id": "ny-dizzys-late-night",
@@ -3655,7 +3655,7 @@
       "sourceEventId": "ny-dizzys-late-night",
       "status": "scheduled",
       "isMajor": false,
-      "imageSourceUrl": "https://jazz.org/wp-content/uploads/2023/07/dizzysclub-home.png",
+      "imageSourceUrl": "https://jazz.org/wp-content/uploads/2023/09/dizzys.jpg",
       "imageIsIllustration": true,
       "lastVerifiedAt": "2026-11-14",
       "evidenceUrl": "https://jazz.org/dizzys/",
@@ -3666,7 +3666,7 @@
         5,
         6
       ],
-      "imageUrl": "/catalog/ny-dizzys-jazz.png"
+      "imageUrl": "/catalog/ny-dizzys-jazz.jpg"
     },
     {
       "id": "ny-atrium-performances",
