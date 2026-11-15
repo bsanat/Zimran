@@ -155,7 +155,7 @@ export function safeExternalUrl(value: string | null, source = "ticketmaster"): 
     const url = new URL(value);
     return url.protocol === "https:" && !url.username && !url.password &&
       (!url.port || url.port === "443") &&
-      (source === "serpapi" || source === "catalog" || url.hostname === "ticketmaster.com" || url.hostname.endsWith(".ticketmaster.com")) ? url.href : null;
+      (source === "serpapi" || source === "catalog" || source === "json" || url.hostname === "ticketmaster.com" || url.hostname.endsWith(".ticketmaster.com")) ? url.href : null;
   } catch {
     return null;
   }

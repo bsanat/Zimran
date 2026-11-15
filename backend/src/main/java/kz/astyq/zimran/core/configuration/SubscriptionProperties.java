@@ -53,7 +53,7 @@ public class SubscriptionProperties {
     public static class Plan {
 
         @Min(0)
-        private int priceCents = 999;
+        private int priceCents = 499;
 
         @NotBlank
         @Pattern(regexp = "[A-Z]{3}")

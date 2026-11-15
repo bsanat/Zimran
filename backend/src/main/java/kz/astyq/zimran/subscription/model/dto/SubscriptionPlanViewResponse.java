@@ -16,7 +16,7 @@ import java.util.List;
 @AllArgsConstructor
 public class SubscriptionPlanViewResponse {
 
-    @Schema(example = "999")
+    @Schema(example = "499")
     private Integer priceCents;
 
     @Schema(example = "USD")

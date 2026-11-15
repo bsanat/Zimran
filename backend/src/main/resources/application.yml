@@ -394,7 +394,7 @@ app:
     last-seen-update-interval: 5m
   subscription:
     plan:
-      price-cents: 999
+      price-cents: 499
       currency: USD
       interval: month
       # Labels: messages subscription_feature_<id>

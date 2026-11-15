@@ -41,7 +41,7 @@ export function PreferencesForm({ onSubmit, busy, action, initialCity = "New Yor
       <fieldset className="social-fieldset"><legend>{t("Your interests")}</legend><div className="social-interest-options">{INTERESTS.map(interest => <label key={interest.id} className={interests.includes(interest.id) ? "selected" : ""}><input type="checkbox" checked={interests.includes(interest.id)} onChange={event => setInterests(current => event.target.checked ? [...current, interest.id] : current.filter(id => id !== interest.id))} />{t(interest.label)}</label>)}</div></fieldset>
       <div className="social-field-pair">
         <label>{t("From date")}<input type="date" name="startDate" required min={today} defaultValue={today} /></label>
-        <label>{t("To date")}<input type="date" name="endDate" required min={today} defaultValue={addDays(today, 30)} /></label>
+        <label>{t("To date")}<input type="date" name="endDate" required min={today} defaultValue={addDays(today, 6)} /></label>
       </div>
       <div className="social-field-pair">
         <label>{t("Maximum budget per person")}<input name="budgetMax" type="number" min="0" max="10000" step="0.01" placeholder={t("Any budget")} /><small>{t("USD. Leave empty for any budget; 0 means free only.")}</small></label>

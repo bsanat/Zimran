@@ -62,7 +62,7 @@ function scopeFor(store: Store, request: Request, now: number): Scope {
   return scope;
 }
 function premium(scope: Scope) { if (!scope.premium) fail(403, "PREMIUM_REQUIRED", "Try Premium Demo to use this feature. No payment is required."); }
-function subscription(scope: Scope): DemoSubscription { return { status: scope.premium ? "DEMO_PREMIUM" : "FREE", price: 9.99, currency: "USD" }; }
+function subscription(scope: Scope): DemoSubscription { return { status: scope.premium ? "DEMO_PREMIUM" : "FREE", price: 4.99, currency: "USD" }; }
 function text(value: unknown, label: string, maximum = 500, minimum = 1): string {
   if (typeof value !== "string" || value.trim().length < minimum || value.trim().length > maximum) invalid(`${label} must contain ${minimum}–${maximum} characters.`);
   return (value as string).trim();

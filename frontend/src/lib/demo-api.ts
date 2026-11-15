@@ -55,5 +55,5 @@ export async function demoRequest<T>(path: string, options: RequestInit = {}): P
 }
 
 export function isSubscription(value: unknown): value is DemoSubscription {
-  return !!value && typeof value === "object" && "status" in value && ["FREE", "DEMO_PREMIUM"].includes(String(value.status)) && "price" in value && value.price === 9.99 && "currency" in value && value.currency === "USD";
+  return !!value && typeof value === "object" && "status" in value && ["FREE", "DEMO_PREMIUM"].includes(String(value.status)) && "price" in value && value.price === 4.99 && "currency" in value && value.currency === "USD";
 }

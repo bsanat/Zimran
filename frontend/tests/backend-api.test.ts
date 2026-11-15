@@ -11,6 +11,7 @@ test("backend client issues one guest token, retries a 401 once and maps the Spr
   let issued = 0;
   const calls: { url: string; init?: RequestInit }[] = [];
   let rejectNext = false;
+  let omitPlan = false;
   t.mock.method(globalThis, "fetch", async (url: string, init?: RequestInit) => {
     calls.push({ url, init });
     if (url.endsWith("/api/guest/session")) return Response.json({ guestToken: tokens[issued++], expiresAt: new Date(Date.now() + 3_600_000).toISOString() });
@@ -22,7 +23,7 @@ test("backend client issues one guest token, retries a 401 once and maps the Spr
     if (url.endsWith("/api/alerts/preferences")) return Response.json({ configured: false, premiumRequired: true, preferences: { city: "New York", categorySlugs: ["music"], frequency: "INSTANT", channels: ["in_app"], paused: false } });
     if (url.includes("/api/notifications?")) return Response.json({ unreadCount: 1, items: [{ id: "n1", eventId: "json:1", title: "Jazz", categorySlug: "food_drinks", createdAt: "2026-11-14T10:00:00Z", readAt: null }], pagination: { page: 1, pageSize: 50, hasMore: false } });
     if (url.endsWith("/read")) return new Response(null, { status: 204 });
-    if (url.endsWith("/api/subscription")) return Response.json({ status: "PREMIUM_ACTIVE", isPremium: true, demoOnly: false, plan: { priceCents: 999, currency: "USD" } });
+    if (url.endsWith("/api/subscription")) return Response.json({ status: "PREMIUM_ACTIVE", isPremium: true, demoOnly: false, plan: omitPlan ? undefined : { priceCents: 499, currency: "USD" } });
     return Response.json({ error: { message: "Unexpected" } }, { status: 500 });
   });
   const client = await import(`../src/lib/backend-api.ts?test=${Date.now()}`);
@@ -43,7 +44,9 @@ test("backend client issues one guest token, retries a 401 once and maps the Spr
   await client.markNotificationRead("n1");
 
   const subscription = await client.getSubscription();
-  assert.deepEqual(subscription, { status: "DEMO_PREMIUM", price: 9.99, currency: "USD" });
+  assert.deepEqual(subscription, { status: "DEMO_PREMIUM", price: 4.99, currency: "USD" });
+  omitPlan = true;
+  assert.deepEqual(await client.getSubscription(), { status: "DEMO_PREMIUM", price: 4.99, currency: "USD" });
 
   rejectNext = true;
   await client.getSubscription();
@@ -117,7 +120,7 @@ test("demo Premium is activated with POST and ended with DELETE on the same back
     calls.push({ url, method: init?.method });
     if (url.endsWith("/api/guest/session")) return Response.json({ guestToken: "aaa.bbb.ccc", expiresAt: new Date(Date.now() + 3_600_000).toISOString() });
     const premium = init?.method === "POST";
-    return Response.json({ status: premium ? "DEMO_PREMIUM" : "FREE", isPremium: premium, demoOnly: premium, plan: { priceCents: 999, currency: "USD" } });
+    return Response.json({ status: premium ? "DEMO_PREMIUM" : "FREE", isPremium: premium, demoOnly: premium, plan: { priceCents: 499, currency: "USD" } });
   });
   const client = await import(`../src/lib/backend-api.ts?premium=${Date.now()}`);
   assert.equal((await client.activateDemoPremium()).status, "DEMO_PREMIUM");

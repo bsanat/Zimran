@@ -90,6 +90,15 @@ test("source links only accept HTTPS Ticketmaster destinations", () => {
   ]) assert.equal(safeExternalUrl(url), null);
 });
 
+test("Spring JSON catalog links accept organizer HTTPS URLs and retain safety checks", () => {
+  assert.equal(safeExternalUrl("https://jazz.org/dizzys/", "json"), "https://jazz.org/dizzys/");
+  assert.equal(safeExternalUrl("https://jazz.org/dizzys/", "unknown"), null);
+  for (const url of [
+    "javascript:alert(1)", "data:text/html,unsafe", "ftp://example.org/event", "http://example.org/event",
+    "https://user:pass@example.org/event", "https://example.org:8443/event",
+  ]) assert.equal(safeExternalUrl(url, "json"), null);
+});
+
 test("SerpApi source links accept HTTPS event websites without credentials or custom ports", () => {
   assert.equal(safeExternalUrl("https://example.org/tickets", "serpapi"), "https://example.org/tickets");
   assert.equal(safeExternalUrl(null, "serpapi"), null);

@@ -58,7 +58,7 @@ test("persisted demo API isolates guests and completes Buddy, pair and notificat
     assert.equal((await call("buddy/posts", "POST", a, { eventId: available.id, displayName: "Alex", bio: "A relaxed evening", language: "English", ageConfirmed: true })).status, 403);
     assert.equal((await call("subscription", "POST", a, { action: "activate" })).body.status, "DEMO_PREMIUM");
     await call("subscription", "POST", b, { action: "activate" });
-    assert.equal((await call("subscription", "GET", a)).body.status, "DEMO_PREMIUM");
+    assert.deepEqual((await call("subscription", "GET", a)).body, { status: "DEMO_PREMIUM", price: 4.99, currency: "USD" });
     const raw = await readFile(join(directory, "state.json"), "utf8");
     assert.ok(!raw.includes(a) && !raw.includes(b));
     assert.ok(raw.includes("tokenHash"));

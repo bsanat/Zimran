@@ -10,7 +10,7 @@ test("demo client keeps independent tab credentials and never replays failed mut
   const calls: { url: string; options: RequestInit | undefined }[] = [];
   const fetchMock = t.mock.method(globalThis, "fetch", async (url: string, options?: RequestInit) => {
     calls.push({ url, options });
-    return Response.json(url.endsWith("/session") ? { token } : { status: "FREE", price: 9.99, currency: "USD" });
+    return Response.json(url.endsWith("/session") ? { token } : { status: "FREE", price: 4.99, currency: "USD" });
   });
   const client = await import(`../src/lib/demo-api.ts?test=${Date.now()}`);
   const tokens = await Promise.all([client.getDemoToken(), client.getDemoToken()]);
@@ -19,8 +19,9 @@ test("demo client keeps independent tab credentials and never replays failed mut
   await client.demoRequest("subscription");
   assert.equal(new Headers(calls[1].options?.headers).get("Authorization"), `Bearer ${token}`);
   assert.equal(calls[1].options?.cache, "no-store");
-  assert.equal(client.isSubscription({ status: "DEMO_PREMIUM", price: 9.99, currency: "USD" }), true);
-  assert.equal(client.isSubscription({ status: "PREMIUM_ACTIVE", price: 9.99, currency: "USD" }), false);
+  assert.equal(client.isSubscription({ status: "DEMO_PREMIUM", price: 4.99, currency: "USD" }), true);
+  assert.equal(client.isSubscription({ status: "DEMO_PREMIUM", price: 9.99, currency: "USD" }), false);
+  assert.equal(client.isSubscription({ status: "PREMIUM_ACTIVE", price: 4.99, currency: "USD" }), false);
   fetchMock.mock.mockImplementation(async () => { calls.push({ url: "failed", options: undefined }); return Response.json({ error: { message: "Expired", code: "SESSION_REQUIRED" } }, { status: 401 }); });
   await assert.rejects(client.demoRequest("buddy/posts", { method: "POST", body: "{}" }), (error: unknown) => error instanceof Error && error.message === "Expired");
   assert.equal(calls.length, 3, "a POST is never repeated automatically");

@@ -201,7 +201,7 @@ function parseSubscription(value: unknown): DemoSubscription {
   return {
     // The screens only distinguish free from premium; PREMIUM_ACTIVE counts as premium too.
     status: body.isPremium ? "DEMO_PREMIUM" : "FREE",
-    price: typeof plan.priceCents === "number" ? plan.priceCents / 100 : 9.99,
+    price: typeof plan.priceCents === "number" ? plan.priceCents / 100 : 4.99,
     currency: typeof plan.currency === "string" ? plan.currency : "USD",
   };
 }
