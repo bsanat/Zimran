@@ -1,7 +1,7 @@
 FROM eclipse-temurin:21-jdk AS build
 WORKDIR /build/backend
 COPY backend/.mvn .mvn
-COPY backend/mvnw backend/pom.xml ./
+COPY backend/mvnw backend/pom.xml backend/lombok.config ./
 COPY backend/src/main src/main
 RUN sh ./mvnw -B -Dmaven.test.skip=true package
 
